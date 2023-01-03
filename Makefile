@@ -7,7 +7,6 @@ CFLAGS += -I ./include/
 DSA_OBJ = \
 src/exit_codes.o \
 src/linked_list.o \
-src/min_heap.o \
 src/void_pointer_functions.o
 
 # individual test files
