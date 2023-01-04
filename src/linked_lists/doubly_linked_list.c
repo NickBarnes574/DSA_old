@@ -1,35 +1,23 @@
-#include "doubly_linked_list.h"
+#include "linked_lists/doubly_linked_list.h"
 
-typedef struct dll_node
+struct dll_node
 {
     void *data;
     dll_node_t *next;
     dll_node_t *prev;
-} dll_node_t;
+};
 
-typedef struct doubly_linked_list
+struct doubly_linked_list
 {
     dll_node_t *head;
     dll_node_t *tail;
     size_t current_size;
-} doubly_linked_list_t;
+};
 
-dll_node_t *create_new_node(void *data)
-{
-    // 1. Allocate memory for new node
-    dll_node_t *new_node = calloc(1, sizeof(dll_node_t));
-    if (NULL == new_node)
-    {
-        return NULL;
-    }
-
-    // 2. Initialize pointers
-    new_node->data = data;
-    new_node->next = NULL;
-    new_node->prev = NULL;
-
-    return new_node;
-}
+/// @brief Creates a new node
+/// @param data The data to be added.
+/// @return new_dll_node_t
+static dll_node_t *create_new_node(void *data);
 
 doubly_linked_list_t *dll_create(void)
 {
@@ -54,13 +42,15 @@ exit_code_t dll_push_head(doubly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     dll_node_t *new_node = create_new_node(data); // Create a new node
@@ -84,6 +74,7 @@ exit_code_t dll_push_head(doubly_linked_list_t *list, void *data)
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -94,13 +85,15 @@ exit_code_t dll_push_tail(doubly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     dll_node_t *new_node = create_new_node(data); // Create a new node
@@ -124,6 +117,7 @@ exit_code_t dll_push_tail(doubly_linked_list_t *list, void *data)
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -134,19 +128,22 @@ exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t pos
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return E_OUT_OF_BOUNDS;
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
     }
 
     dll_node_t *new_node = create_new_node(data); // Create a new node
@@ -199,6 +196,7 @@ exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t pos
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -623,4 +621,18 @@ void dll_destroy_list(doubly_linked_list_t **list)
     // 3. Destroy the list container
     free(*list);
     *list = NULL;
+}
+
+dll_node_t *create_new_node(void *data)
+{
+    // 1. Allocate memory for new node
+    dll_node_t *new_node = calloc(1, sizeof(dll_node_t));
+    if (NULL != new_node)
+    {
+        new_node->data = data;
+        new_node->next = NULL;
+        new_node->prev = NULL;
+    }
+
+    return new_node;
 }

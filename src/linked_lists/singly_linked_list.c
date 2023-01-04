@@ -1,33 +1,22 @@
-#include "singly_linked_list.h"
+#include "linked_lists/singly_linked_list.h"
 
-typedef struct sll_node
+struct sll_node
 {
     void *data;
     sll_node_t *next;
-} sll_node_t;
+};
 
-typedef struct singly_linked_list
+struct singly_linked_list
 {
     sll_node_t *head;
     sll_node_t *tail;
     size_t current_size;
-} singly_linked_list_t;
+};
 
-sll_node_t *create_new_node(void *data)
-{
-    // 1. Allocate memory for new node
-    sll_node_t *new_node = calloc(1, sizeof(sll_node_t));
-    if (NULL == new_node)
-    {
-        return NULL;
-    }
-
-    // 2. Initialize pointers
-    new_node->data = data;
-    new_node->next = NULL;
-
-    return new_node;
-}
+/// @brief Creates a new node
+/// @param data The data to be added.
+/// @return new_sll_node_t
+static sll_node_t *create_new_node(void *data);
 
 singly_linked_list_t *sll_create(void)
 {
@@ -156,17 +145,18 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     }    
     else
     {
-        sll_node_t *current_node = NULL;
-
-        current_node = list->head;
+        sll_node_t *previous_node = NULL;
+        sll_node_t *current_node = list->head;
 
         // Start searching from the head
         for (size_t current_pos = 1; current_pos < position; current_pos++)
         {
+            previous_node = current_node;
             current_node = current_node->next;
         }
 
         new_node->next = current_node;
+        previous_node->next = new_node;
 
         current_node = new_node;
     }
@@ -387,12 +377,19 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
     }
     else
     {
-        sll_node_t *temp = list->head->next;
+        sll_node_t *previous_node = NULL;
+        sll_node_t *current_node = list->head;
 
-        free(list->tail);
-        list->tail = NULL;
+        // Start searching from the head
+        for (size_t current_pos = 1; current_pos < list->current_size; current_pos++)
+        {
+            previous_node = current_node;
+            current_node = current_node->next;
+        }
 
-        list->tail = temp;
+        list->tail = previous_node;
+        
+        free(list->tail->next);
         list->tail->next = NULL;
     }
 
@@ -440,10 +437,8 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
         return exit_code;  
     }
 
-    sll_node_t *current_node = NULL;
+    sll_node_t *current_node = list->head;
     sll_node_t *previous_node = NULL;
-
-    current_node = list->head;
 
     // Start searching from the head
     for (size_t current_pos = 1; current_pos < position; current_pos++)
@@ -463,7 +458,7 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
     return exit_code;    
 }
 
-exit_code_t sll_print_list(singly_linked_list_t *list, void (*function_ptr)(void *), bool reverse)
+exit_code_t sll_print_list(singly_linked_list_t *list, void (*function_ptr)(void *))
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -531,4 +526,20 @@ void sll_destroy_list(singly_linked_list_t **list)
     // 3. Destroy the list container
     free(*list);
     *list = NULL;
+}
+
+sll_node_t *create_new_node(void *data)
+{
+    // 1. Allocate memory for new node
+    sll_node_t *new_node = calloc(1, sizeof(sll_node_t));
+    if (NULL == new_node)
+    {
+        return NULL;
+    }
+
+    // 2. Initialize pointers
+    new_node->data = data;
+    new_node->next = NULL;
+
+    return new_node;
 }

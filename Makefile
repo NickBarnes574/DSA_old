@@ -6,15 +6,16 @@ CFLAGS += -I ./include/
 
 DSA_OBJ = \
 src/exit_codes.o \
-src/linked_list.o \
+src/linked_lists/singly_linked_list.o\
+src/linked_lists/doubly_linked_list.o \
 src/void_pointer_functions.o
 
 # individual test files
-LINKED_LIST_TESTS = test/linked_list_tests.o
-MIN_HEAP_TESTS = test/min_heap_tests.o
+SINGLY_LINKED_LIST_TESTS = test/linked_lists/singly_linked_list_tests.o
+DOUBLY_LINKED_LIST_TESTS = test/linked_lists/doubly_linked_list_tests.o
 
 # combile all the tests into one list
-ALL_TESTS = test/dsa_test_all.o $(LINKED_LIST_TESTS) $(MIN_HEAP_TESTS)
+ALL_TESTS = test/dsa_test_all.o $(SINGLY_LINKED_LIST_TESTS) $(DOUBLY_LINKED_LIST_TESTS)
 
 # make a library
 .PHONY: library
