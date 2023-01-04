@@ -41,13 +41,15 @@ exit_code_t sll_push_head(singly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     sll_node_t *new_node = create_new_node(data); // Create a new node
@@ -70,6 +72,7 @@ exit_code_t sll_push_head(singly_linked_list_t *list, void *data)
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -80,13 +83,15 @@ exit_code_t sll_push_tail(singly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     sll_node_t *new_node = create_new_node(data); // Create a new node
@@ -109,6 +114,7 @@ exit_code_t sll_push_tail(singly_linked_list_t *list, void *data)
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -119,19 +125,22 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 2. Check if data exists
     if (NULL == data)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return E_OUT_OF_BOUNDS;
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
     }
 
     sll_node_t *new_node = create_new_node(data); // Create a new node
@@ -165,65 +174,59 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     list->current_size += 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
 void *sll_peek_head(singly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
-    }
+    data = list->head->data;
 
-    return list->head->data;
+END:
+    return data;
 }
 
 void *sll_peek_tail(singly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->tail)
-    {
-        return NULL;
-    }
+    data = list->tail->data;
 
-    return list->tail->data;
+END:
+    return data;
 }
 
 void *sll_peek_position(singly_linked_list_t *list, size_t position)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
-    }
-
-    // 3. Check if position is out of range
+    // Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return NULL;
+        goto END;
     }
 
     sll_node_t *current_node = NULL;
-    void *data = NULL;
 
     current_node = list->head;
 
@@ -235,71 +238,61 @@ void *sll_peek_position(singly_linked_list_t *list, size_t position)
     
     data = current_node->data;
 
+END:
     return data;
 }
 
 void *sll_pop_head(singly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+    
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
-    }
-
-    void *data = list->head->data;
+    data = list->head->data;
     sll_remove_head(list);
 
+END:
     return data;
 }
 
 void *sll_pop_tail(singly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+    
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->tail)
-    {
-        return NULL;
-    }
-
-    void *data = list->tail->data;
+    data = list->tail->data;
     sll_remove_tail(list);
 
+END:
     return data;
 }
 
 void *sll_pop_position(singly_linked_list_t *list, size_t position)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+    
+    // Check if list exists or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
-    }
-
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return NULL;
+        goto END;
     }
 
     sll_node_t *current_node = NULL;
-    void *data = NULL;
 
     current_node = list->head;
 
@@ -312,6 +305,7 @@ void *sll_pop_position(singly_linked_list_t *list, size_t position)
     data = current_node->data;
     sll_remove_position(list, position);
 
+END:
     return data;
 }
 
@@ -319,16 +313,11 @@ exit_code_t sll_remove_head(singly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if the list exists
-    if (NULL == list)
+    // 1. Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if the list is empty
-    if (NULL == list->head)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if there is only one node in the list
@@ -350,6 +339,7 @@ exit_code_t sll_remove_head(singly_linked_list_t *list)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -357,16 +347,11 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if the list exists
-    if (NULL == list)
+    // 1. Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if the list is empty
-    if (NULL == list->tail)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if there is only one node in the list
@@ -396,6 +381,7 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -403,42 +389,36 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
-    // 1. Check if list exists
-    if (NULL == list)
+    // 1. Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return E_OUT_OF_BOUNDS;
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
     }
 
     // 4. Check if position is at the head
     if (position == 1)
     {
         exit_code = sll_remove_head(list);
-
-        return exit_code;    
+        goto END; 
     }
 
     // 5. Check if position is at the tail
     if (position == list->current_size)
     {
         exit_code = sll_remove_tail(list);
-
-        return exit_code;  
+        goto END;  
     }
 
-    sll_node_t *current_node = list->head;
     sll_node_t *previous_node = NULL;
+    sll_node_t *current_node = list->head;
 
     // Start searching from the head
     for (size_t current_pos = 1; current_pos < position; current_pos++)
@@ -455,21 +435,26 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;    
 }
 
 exit_code_t sll_print_list(singly_linked_list_t *list, void (*function_ptr)(void *))
 {
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 2. Check for NULL function pointer
     if (NULL == function_ptr)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     sll_node_t *current_node = NULL; // Create a current node
@@ -485,7 +470,9 @@ exit_code_t sll_print_list(singly_linked_list_t *list, void (*function_ptr)(void
         current_node = current_node->next;
     }
 
-    return E_SUCCESS;
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
 }
 
 void sll_clear_list(singly_linked_list_t **list)
@@ -493,7 +480,7 @@ void sll_clear_list(singly_linked_list_t **list)
     // 1. Check if list is empty
     if (NULL == list)
     {
-        return;
+        goto END;
     }
 
     sll_node_t *current_node = (*list)->head;
@@ -510,6 +497,9 @@ void sll_clear_list(singly_linked_list_t **list)
     (*list)->head = NULL;
     (*list)->tail = NULL;
     (*list)->current_size = 0;
+
+END:
+    return;
 }
 
 void sll_destroy_list(singly_linked_list_t **list)
@@ -517,7 +507,7 @@ void sll_destroy_list(singly_linked_list_t **list)
     // 1. Check if list is empty
     if (NULL == list)
     {
-        return;
+        goto END;
     }
 
     // 2. Clear out all the nodes
@@ -526,6 +516,9 @@ void sll_destroy_list(singly_linked_list_t **list)
     // 3. Destroy the list container
     free(*list);
     *list = NULL;
+
+END:
+    return;
 }
 
 sll_node_t *create_new_node(void *data)
@@ -534,12 +527,13 @@ sll_node_t *create_new_node(void *data)
     sll_node_t *new_node = calloc(1, sizeof(sll_node_t));
     if (NULL == new_node)
     {
-        return NULL;
+        goto END;
     }
 
     // 2. Initialize pointers
     new_node->data = data;
     new_node->next = NULL;
 
+END:
     return new_node;
 }

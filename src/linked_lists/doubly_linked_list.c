@@ -42,7 +42,7 @@ exit_code_t dll_push_head(doubly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
         goto END;
     }
 
@@ -85,7 +85,7 @@ exit_code_t dll_push_tail(doubly_linked_list_t *list, void *data)
     // 1. Check if list exists
     if (NULL == list)
     {
-        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
         goto END;
     }
 
@@ -128,7 +128,7 @@ exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t pos
     // 1. Check if list exists
     if (NULL == list)
     {
-        exit_code = E_CONTAINER_DOES_NOT_EXIST;
+        exit_code = E_LIST_ERROR;
         goto END;
     }
 
@@ -202,62 +202,55 @@ END:
 
 void *dll_peek_head(doubly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
-    }
+    data = list->head->data;
 
-    return list->head->data;
+END:
+    return data;
 }
 
 void *dll_peek_tail(doubly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->tail)
-    {
-        return NULL;
-    }
+    data = list->tail->data;
 
-    return list->tail->data;
+END:
+    return data;
 }
 
 void *dll_peek_position(doubly_linked_list_t *list, size_t position)
 {
-    // 1. Check if list exists
-    if (NULL == list)
-    {
-        return NULL;
-    }
+    void *data = NULL;
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return NULL;
+        goto END;
     }
 
     size_t middle_position = list->current_size / 2; // Get the middle position of the list
     size_t end_position = list->current_size; // Get the end position of the list
     dll_node_t *current_node = NULL;
-    void *data = NULL;
 
     // Check if the position is in the first or second half of the list
     if (position <= middle_position)
@@ -285,73 +278,63 @@ void *dll_peek_position(doubly_linked_list_t *list, size_t position)
         data = current_node->data;
     }
 
+END:
     return data;
 }
 
 void *dll_pop_head(doubly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return NULL;
-    }
-
-    void *data = list->head->data;
+    data = list->head->data;
     dll_remove_head(list);
 
+END:
     return data;
 }
 
 void *dll_pop_tail(doubly_linked_list_t *list)
 {
-    // 1. Check if list exists
-    if (NULL == list)
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
     {
-        return NULL;
+        goto END;
     }
 
-    // 2. Check if list is empty
-    if (NULL == list->tail)
-    {
-        return NULL;
-    }
-
-    void *data = list->tail->data;
+    data = list->tail->data;
     dll_remove_tail(list);
 
+END:
     return data;
 }
 
 void *dll_pop_position(doubly_linked_list_t *list, size_t position)
 {
-    // 1. Check if list exists
-    if (NULL == list)
-    {
-        return NULL;
-    }
+    void *data = NULL;
 
-    // 2. Check if list is empty
-    if (NULL == list->head)
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return NULL;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return NULL;
+        goto END;
     }
 
     size_t middle_position = list->current_size / 2; // Get the middle position of the list
     size_t end_position = list->current_size; // Get the end position of the list
     dll_node_t *current_node = NULL;
-    void *data = NULL;
 
     // Check if the position is in the first or second half of the list
     if (position <= middle_position)
@@ -381,6 +364,7 @@ void *dll_pop_position(doubly_linked_list_t *list, size_t position)
         dll_remove_position(list, position);
     }
 
+END:
     return data;
 }
 
@@ -388,16 +372,11 @@ exit_code_t dll_remove_head(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if the list exists
-    if (NULL == list)
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if the list is empty
-    if (NULL == list->head)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if there is only one node in the list
@@ -419,6 +398,7 @@ exit_code_t dll_remove_head(doubly_linked_list_t *list)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -426,16 +406,11 @@ exit_code_t dll_remove_tail(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if the list exists
-    if (NULL == list)
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if the list is empty
-    if (NULL == list->tail)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if there is only one node in the list
@@ -458,6 +433,7 @@ exit_code_t dll_remove_tail(doubly_linked_list_t *list)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;
 }
 
@@ -465,22 +441,18 @@ exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
-    // 1. Check if list exists
-    if (NULL == list)
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
     {
-        return E_CONTAINER_DOES_NOT_EXIST;
-    }
-
-    // 2. Check if list is empty
-    if (NULL == list->head)
-    {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 3. Check if position is out of range
     if (position > list->current_size || position == 0)
     {
-        return E_OUT_OF_BOUNDS;
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
     }
 
     // 4. Check if position is at the head
@@ -534,21 +506,26 @@ exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
     list->current_size -= 1;
 
     exit_code = E_SUCCESS;
+END:
     return exit_code;    
 }
 
 exit_code_t dll_print_list(doubly_linked_list_t *list, void (*function_ptr)(void *), bool reverse)
 {
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
     // 1. Check if list exists
     if (NULL == list)
     {
-        return E_CONTAINER_EMPTY;
+        exit_code = E_LIST_ERROR;
+        goto END;
     }
 
     // 2. Check for NULL function pointer
     if (NULL == function_ptr)
     {
-        return E_NULL_POINTER;
+        exit_code = E_NULL_POINTER;
+        goto END;
     }
 
     dll_node_t *current_node = NULL; // Create a current node
@@ -563,7 +540,6 @@ exit_code_t dll_print_list(doubly_linked_list_t *list, void (*function_ptr)(void
         current_node = list->head;
     }
     
-
     // 4. Print the list
     while (NULL != current_node)
     {
@@ -580,7 +556,9 @@ exit_code_t dll_print_list(doubly_linked_list_t *list, void (*function_ptr)(void
         }
     }
 
-    return E_SUCCESS;
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
 }
 
 void dll_clear_list(doubly_linked_list_t **list)
@@ -588,7 +566,7 @@ void dll_clear_list(doubly_linked_list_t **list)
     // 1. Check if list is empty
     if (NULL == list)
     {
-        return;
+        goto END;
     }
 
     dll_node_t *current_node = (*list)->head;
@@ -605,6 +583,9 @@ void dll_clear_list(doubly_linked_list_t **list)
     (*list)->head = NULL;
     (*list)->tail = NULL;
     (*list)->current_size = 0;
+
+END:
+    return;
 }
 
 void dll_destroy_list(doubly_linked_list_t **list)
@@ -612,7 +593,7 @@ void dll_destroy_list(doubly_linked_list_t **list)
     // 1. Check if list is empty
     if (NULL == list)
     {
-        return;
+        goto END;
     }
 
     // 2. Clear out all the nodes
@@ -621,6 +602,9 @@ void dll_destroy_list(doubly_linked_list_t **list)
     // 3. Destroy the list container
     free(*list);
     *list = NULL;
+
+END:
+    return;
 }
 
 dll_node_t *create_new_node(void *data)

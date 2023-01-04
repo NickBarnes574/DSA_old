@@ -54,9 +54,7 @@ typedef enum exit_code
     E_NULL_POINTER, // Pointer is NULL
 
     // General Data Structures
-    E_CONTAINER_DOES_NOT_EXIST, // Container does not exist
-    E_CONTAINER_EMPTY,          // Container is empty
-    E_CONTAINER_NOT_EMPTY,      // Container is not empty
+    E_LIST_ERROR, // Container does not exist or is empty
 
     // Tree
     E_KEY_ALREADY_EXISTS, // Key already exists

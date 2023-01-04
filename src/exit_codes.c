@@ -58,9 +58,7 @@ exit_message[] =
     {E_NULL_POINTER, "Unexpected NULL pointer detected.\n"},
 
     // Data Structures
-    {E_CONTAINER_DOES_NOT_EXIST, "Container does not exist.\n"},
-    {E_CONTAINER_EMPTY, "Container empty when expected to be occupied.\n"},
-    {E_CONTAINER_NOT_EMPTY, "Container occupied when expected to be empty.\n"},
+    {E_LIST_ERROR, "List does not exist or is empty.\n"},
 
     // Tree
     {E_KEY_ALREADY_EXISTS, "Key already exists in tree.\n"},
