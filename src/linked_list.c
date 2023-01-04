@@ -1,23 +1,21 @@
 #include "linked_list.h"
 
-struct node
+node_t *create_new_node(void *data)
 {
-    void *data;
-    node_t *next;
-    node_t *prev;
-};
+    // 1. Allocate memory for new node
+    node_t *new_node = calloc(1, sizeof(node_t));
+    if (NULL == new_node)
+    {
+        return NULL;
+    }
 
-struct linked_list
-{
-    node_t *head;
-    node_t *tail;
-    size_t current_size;
-};
+    // 2. Initialize pointers
+    new_node->data = data;
+    new_node->next = NULL;
+    new_node->prev = NULL;
 
-/// @brief Creates a new node
-/// @param data The data to be added.
-/// @return new_node_t
-static node_t *create_new_node(void *data);
+    return new_node;
+}
 
 linked_list_t *create_list(void)
 {
@@ -611,21 +609,4 @@ void destroy_list(linked_list_t **list)
     // 3. Destroy the list container
     free(*list);
     *list = NULL;
-}
-
-node_t *create_new_node(void *data)
-{
-    // 1. Allocate memory for new node
-    node_t *new_node = calloc(1, sizeof(node_t));
-    if (NULL == new_node)
-    {
-        return NULL;
-    }
-
-    // 2. Initialize pointers
-    new_node->data = data;
-    new_node->next = NULL;
-    new_node->prev = NULL;
-
-    return new_node;
 }

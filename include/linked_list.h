@@ -7,11 +7,24 @@
 
 #include "exit_codes.h"
 
-// Node for a linked list
-typedef struct node node_t;
+typedef struct node
+{
+    void *data;
+    node_t *next;
+    node_t *prev;
+} node_t;
 
-// Linked list container
-typedef struct linked_list linked_list_t;
+typedef struct linked_list
+{
+    node_t *head;
+    node_t *tail;
+    size_t current_size;
+} linked_list_t;
+
+/// @brief Creates a new node
+/// @param data The data to be added.
+/// @return new_node_t
+node_t *create_new_node(void *data);
 
 /// @brief Creates a doubly-linked list container.
 /// @param  void Takes no parameters.
