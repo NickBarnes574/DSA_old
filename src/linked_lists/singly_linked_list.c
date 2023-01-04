@@ -388,7 +388,7 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
         }
 
         list->tail = previous_node;
-        
+
         free(list->tail->next);
         list->tail->next = NULL;
     }
