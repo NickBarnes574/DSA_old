@@ -1,9 +1,23 @@
-#include "linked_list.h"
+#include "doubly_linked_list.h"
 
-node_t *create_new_node(void *data)
+typedef struct dll_node
+{
+    void *data;
+    dll_node_t *next;
+    dll_node_t *prev;
+} dll_node_t;
+
+typedef struct doubly_linked_list
+{
+    dll_node_t *head;
+    dll_node_t *tail;
+    size_t current_size;
+} doubly_linked_list_t;
+
+dll_node_t *create_new_node(void *data)
 {
     // 1. Allocate memory for new node
-    node_t *new_node = calloc(1, sizeof(node_t));
+    dll_node_t *new_node = calloc(1, sizeof(dll_node_t));
     if (NULL == new_node)
     {
         return NULL;
@@ -17,10 +31,10 @@ node_t *create_new_node(void *data)
     return new_node;
 }
 
-linked_list_t *create_list(void)
+doubly_linked_list_t *dll_create(void)
 {
     // 1. Create the list
-    linked_list_t *list = calloc(1, sizeof(linked_list_t));
+    doubly_linked_list_t *list = calloc(1, sizeof(doubly_linked_list_t));
 
     // 2. Check if memory allocation was successful
     if (NULL != list)
@@ -33,7 +47,7 @@ linked_list_t *create_list(void)
     return list;
 }
 
-exit_code_t push_head(linked_list_t *list, void *data)
+exit_code_t dll_push_head(doubly_linked_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -49,7 +63,7 @@ exit_code_t push_head(linked_list_t *list, void *data)
         return E_NULL_POINTER;
     }
 
-    node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 3. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -73,7 +87,7 @@ exit_code_t push_head(linked_list_t *list, void *data)
     return exit_code;
 }
 
-exit_code_t push_tail(linked_list_t *list, void *data)
+exit_code_t dll_push_tail(doubly_linked_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -89,7 +103,7 @@ exit_code_t push_tail(linked_list_t *list, void *data)
         return E_NULL_POINTER;
     }
 
-    node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 3. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -113,7 +127,7 @@ exit_code_t push_tail(linked_list_t *list, void *data)
     return exit_code;
 }
 
-exit_code_t push_position(linked_list_t *list, void *data, size_t position)
+exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -135,7 +149,7 @@ exit_code_t push_position(linked_list_t *list, void *data, size_t position)
         return E_OUT_OF_BOUNDS;
     }
 
-    node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 4. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -148,7 +162,7 @@ exit_code_t push_position(linked_list_t *list, void *data, size_t position)
     {
         size_t middle_position = list->current_size / 2; // Get the middle position of the list
         size_t end_position = list->current_size; // Get the end position of the list
-        node_t *current_node = NULL;
+        dll_node_t *current_node = NULL;
 
         // Check if the position is in the first or second half of the list
         if (position <= middle_position)
@@ -188,7 +202,7 @@ exit_code_t push_position(linked_list_t *list, void *data, size_t position)
     return exit_code;
 }
 
-void *peek_head(linked_list_t *list)
+void *dll_peek_head(doubly_linked_list_t *list)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -205,7 +219,7 @@ void *peek_head(linked_list_t *list)
     return list->head->data;
 }
 
-void *peek_tail(linked_list_t *list)
+void *dll_peek_tail(doubly_linked_list_t *list)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -222,7 +236,7 @@ void *peek_tail(linked_list_t *list)
     return list->tail->data;
 }
 
-void *peek_position(linked_list_t *list, size_t position)
+void *dll_peek_position(doubly_linked_list_t *list, size_t position)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -244,7 +258,7 @@ void *peek_position(linked_list_t *list, size_t position)
 
     size_t middle_position = list->current_size / 2; // Get the middle position of the list
     size_t end_position = list->current_size; // Get the end position of the list
-    node_t *current_node = NULL;
+    dll_node_t *current_node = NULL;
     void *data = NULL;
 
     // Check if the position is in the first or second half of the list
@@ -276,7 +290,7 @@ void *peek_position(linked_list_t *list, size_t position)
     return data;
 }
 
-void *pop_head(linked_list_t *list)
+void *dll_pop_head(doubly_linked_list_t *list)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -291,12 +305,12 @@ void *pop_head(linked_list_t *list)
     }
 
     void *data = list->head->data;
-    remove_head(list);
+    dll_remove_head(list);
 
     return data;
 }
 
-void *pop_tail(linked_list_t *list)
+void *dll_pop_tail(doubly_linked_list_t *list)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -311,12 +325,12 @@ void *pop_tail(linked_list_t *list)
     }
 
     void *data = list->tail->data;
-    remove_tail(list);
+    dll_remove_tail(list);
 
     return data;
 }
 
-void *pop_position(linked_list_t *list, size_t position)
+void *dll_pop_position(doubly_linked_list_t *list, size_t position)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -338,7 +352,7 @@ void *pop_position(linked_list_t *list, size_t position)
 
     size_t middle_position = list->current_size / 2; // Get the middle position of the list
     size_t end_position = list->current_size; // Get the end position of the list
-    node_t *current_node = NULL;
+    dll_node_t *current_node = NULL;
     void *data = NULL;
 
     // Check if the position is in the first or second half of the list
@@ -353,7 +367,7 @@ void *pop_position(linked_list_t *list, size_t position)
         }
         
         data = current_node->data;
-        remove_position(list, position);
+        dll_remove_position(list, position);
     }
     else
     {
@@ -366,13 +380,13 @@ void *pop_position(linked_list_t *list, size_t position)
         }
         
         data = current_node->data;
-        remove_position(list, position);
+        dll_remove_position(list, position);
     }
 
     return data;
 }
 
-exit_code_t remove_head(linked_list_t *list)
+exit_code_t dll_remove_head(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
@@ -396,7 +410,7 @@ exit_code_t remove_head(linked_list_t *list)
     }
     else
     {
-        node_t *temp = list->head->next;
+        dll_node_t *temp = list->head->next;
 
         free(list->head);
         list->head = NULL;
@@ -410,7 +424,7 @@ exit_code_t remove_head(linked_list_t *list)
     return exit_code;
 }
 
-exit_code_t remove_tail(linked_list_t *list)
+exit_code_t dll_remove_tail(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
@@ -434,7 +448,7 @@ exit_code_t remove_tail(linked_list_t *list)
     }
     else
     {
-        node_t *temp = list->tail->prev;
+        dll_node_t *temp = list->tail->prev;
 
         free(list->tail);
         list->tail = NULL;
@@ -449,7 +463,7 @@ exit_code_t remove_tail(linked_list_t *list)
     return exit_code;
 }
 
-exit_code_t remove_position(linked_list_t *list, size_t position)
+exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -474,7 +488,7 @@ exit_code_t remove_position(linked_list_t *list, size_t position)
     // 4. Check if position is at the head
     if (position == 1)
     {
-        exit_code = remove_head(list);
+        exit_code = dll_remove_head(list);
 
         return exit_code;    
     }
@@ -482,14 +496,14 @@ exit_code_t remove_position(linked_list_t *list, size_t position)
     // 5. Check if position is at the tail
     if (position == list->current_size)
     {
-        exit_code = remove_tail(list);
+        exit_code = dll_remove_tail(list);
 
         return exit_code;  
     }
 
     size_t middle_position = list->current_size / 2; // Get the middle position of the list
     size_t end_position = list->current_size; // Get the end position of the list
-    node_t *current_node = NULL;
+    dll_node_t *current_node = NULL;
 
     // Check if the position is in the first or second half of the list
     if (position <= middle_position)
@@ -525,7 +539,7 @@ exit_code_t remove_position(linked_list_t *list, size_t position)
     return exit_code;    
 }
 
-exit_code_t print_list(linked_list_t *list, void (*function_ptr)(void *), bool reverse)
+exit_code_t dll_print_list(doubly_linked_list_t *list, void (*function_ptr)(void *), bool reverse)
 {
     // 1. Check if list exists
     if (NULL == list)
@@ -539,7 +553,7 @@ exit_code_t print_list(linked_list_t *list, void (*function_ptr)(void *), bool r
         return E_NULL_POINTER;
     }
 
-    node_t *current_node = NULL; // Create a current node
+    dll_node_t *current_node = NULL; // Create a current node
 
     // 3. Set the current node to tail if reverse flag is true
     if (reverse)
@@ -571,7 +585,7 @@ exit_code_t print_list(linked_list_t *list, void (*function_ptr)(void *), bool r
     return E_SUCCESS;
 }
 
-void clear_list(linked_list_t **list)
+void dll_clear_list(doubly_linked_list_t **list)
 {
     // 1. Check if list is empty
     if (NULL == list)
@@ -579,8 +593,8 @@ void clear_list(linked_list_t **list)
         return;
     }
 
-    node_t *current_node = (*list)->head;
-    node_t *next_node = NULL;
+    dll_node_t *current_node = (*list)->head;
+    dll_node_t *next_node = NULL;
 
     // 2. Clear out all the nodes in the list
     while (NULL != current_node)
@@ -595,7 +609,7 @@ void clear_list(linked_list_t **list)
     (*list)->current_size = 0;
 }
 
-void destroy_list(linked_list_t **list)
+void dll_destroy_list(doubly_linked_list_t **list)
 {
     // 1. Check if list is empty
     if (NULL == list)
@@ -604,7 +618,7 @@ void destroy_list(linked_list_t **list)
     }
 
     // 2. Clear out all the nodes
-    clear_list(list);
+    dll_clear_list(list);
 
     // 3. Destroy the list container
     free(*list);
