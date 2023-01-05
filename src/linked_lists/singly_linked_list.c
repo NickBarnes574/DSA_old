@@ -13,10 +13,18 @@ struct singly_linked_list
     size_t current_size;
 };
 
+typedef struct results
+{
+    sll_node_t *previous_node;
+    sll_node_t *current_node;
+} results_t;
+
 /// @brief Creates a new node
 /// @param data The data to be added.
 /// @return new_sll_node_t
 static sll_node_t *create_new_node(void *data);
+
+static results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position);
 
 singly_linked_list_t *sll_create(void)
 {
@@ -137,7 +145,7 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     }
 
     // 3. Check if position is out of range
-    if (position > list->current_size || position == 0)
+    if ((position > list->current_size) || (position == 0))
     {
         exit_code = E_OUT_OF_BOUNDS;
         goto END;
@@ -154,20 +162,16 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     }    
     else
     {
-        sll_node_t *previous_node = NULL;
-        sll_node_t *current_node = list->head;
+        // Retrieve the node at the current position, as well as the previous adjacent node
+        results_t *results = get_nodes_at_pos(list, position);
 
-        // Start searching from the head
-        for (size_t current_pos = 1; current_pos < position; current_pos++)
-        {
-            previous_node = current_node;
-            current_node = current_node->next;
-        }
+        new_node->next = results->current_node;
+        results->previous_node->next = new_node;
 
-        new_node->next = current_node;
-        previous_node->next = new_node;
+        results->current_node = new_node;
 
-        current_node = new_node;
+        free(results);
+        results = NULL;
     }
 
     // 4. Increment the size of the list
@@ -226,17 +230,11 @@ void *sll_peek_position(singly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    sll_node_t *current_node = NULL;
-
-    current_node = list->head;
-
-    // Start searching from the head
-    for (size_t current_pos = 1; current_pos < position; current_pos++)
-    {
-        current_node = current_node->next;
-    }
-    
-    data = current_node->data;
+    // Retrieve the node at the current position
+    results_t *results = get_nodes_at_pos(list, position);
+    data = results->current_node->data;
+    free(results);
+    results = NULL;
 
 END:
     return data;
@@ -292,17 +290,12 @@ void *sll_pop_position(singly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    sll_node_t *current_node = NULL;
+    // Retrieve the node at the current position
+    results_t *results = get_nodes_at_pos(list, position);
+    data = results->current_node->data;
+    free(results);
+    results = NULL;
 
-    current_node = list->head;
-
-    // Start searching from the head
-    for (size_t current_pos = 1; current_pos < position; current_pos++)
-    {
-        current_node = current_node->next;
-    }
-    
-    data = current_node->data;
     sll_remove_position(list, position);
 
 END:
@@ -362,17 +355,10 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
     }
     else
     {
-        sll_node_t *previous_node = NULL;
-        sll_node_t *current_node = list->head;
-
-        // Start searching from the head
-        for (size_t current_pos = 1; current_pos < list->current_size; current_pos++)
-        {
-            previous_node = current_node;
-            current_node = current_node->next;
-        }
-
-        list->tail = previous_node;
+        // Retrieve the node at the end of the list
+        results_t *results = get_nodes_at_pos(list, list->current_size);
+        list->tail = results->previous_node;
+        free(results);
     }
 
     free(list->tail->next);
@@ -417,19 +403,13 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
         goto END;  
     }
 
-    sll_node_t *previous_node = NULL;
-    sll_node_t *current_node = list->head;
-
-    // Start searching from the head
-    for (size_t current_pos = 1; current_pos < position; current_pos++)
-    {
-        previous_node = current_node;
-        current_node = current_node->next;
-    }
-
-    previous_node->next = current_node->next;
-
-    free(current_node);
+    // Retrieve the node at the current position, as well as the previous adjacent node
+    results_t *results = get_nodes_at_pos(list, position);
+    results->previous_node->next = results->current_node->next;
+    free(results->current_node);
+    results->current_node = NULL;
+    free(results);
+    results = NULL;
     
     // 4. Increment the size of the list
     list->current_size -= 1;
@@ -536,4 +516,38 @@ sll_node_t *create_new_node(void *data)
 
 END:
     return new_node;
+}
+
+results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position)
+{
+    results_t *results = calloc(1, sizeof(results_t));
+    if (NULL == results)
+    {
+        goto END;
+    }
+
+	results->previous_node = NULL;
+	results->current_node = NULL;
+
+	if ((NULL == list) || (NULL == list->head))
+	{
+		goto END;
+	}
+
+	if ((position > list->current_size) || (position == 0))
+	{
+		goto END;
+	}
+
+    results->current_node = list->head;
+
+    // Start searching from the head
+    for (size_t current_pos = 1; current_pos < position; current_pos++)
+    {
+        results->previous_node = results->current_node;
+        results->current_node = results->current_node->next;
+    }
+
+END:
+    return results;
 }
