@@ -25,8 +25,7 @@ typedef struct results
 /// @return new_dll_node_t
 static dll_node_t *create_new_node(void *data);
 
-static results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position);
-static void free_results(results_t *results);
+static exit_code_t get_nodes_at_pos(results_t **results_p, doubly_linked_list_t *list, size_t position);
 
 doubly_linked_list_t *dll_create(void)
 {
@@ -166,7 +165,14 @@ exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t pos
     }    
     else
     {
-        results_t *results = get_nodes_at_pos(list, position);
+        results_t *results = NULL;
+        exit_code = get_nodes_at_pos(&results, list, position);
+        if (E_SUCCESS != exit_code)
+        {
+            free(results);
+            results = NULL;
+            goto END;
+        }
         
         results->current_node->prev->next = new_node;
         new_node->prev = results->current_node->prev;
@@ -236,7 +242,14 @@ void *dll_peek_position(doubly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
 
     data = results->current_node->data;
 
@@ -297,7 +310,14 @@ void *dll_pop_position(doubly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
         
     data = results->current_node->data;
     dll_remove_position(list, position);
@@ -411,7 +431,14 @@ exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
         return exit_code;  
     }
 
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
 
     results->current_node->prev->next = results->current_node->next;
     results->current_node->next->prev = results->current_node->prev->next;
@@ -538,11 +565,14 @@ dll_node_t *create_new_node(void *data)
     return new_node;
 }
 
-results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position)
+exit_code_t get_nodes_at_pos(results_t **results_p, doubly_linked_list_t *list, size_t position)
 {
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
     results_t *results = calloc(1, sizeof(results_t));
     if (NULL == results)
     {
+        exit_code = E_NULL_POINTER;
         goto END;
     }
 
@@ -551,11 +581,13 @@ results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position)
 
 	if ((NULL == list) || (NULL == list->head))
 	{
+        exit_code = E_LIST_ERROR;
 		goto END;
 	}
 
 	if ((position > list->current_size) || (position == 0))
 	{
+        exit_code = E_OUT_OF_BOUNDS;
 		goto END;
 	}
 
@@ -586,15 +618,8 @@ results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position)
         }
     }
 
+    *results_p = results;
+    exit_code = E_SUCCESS;
 END:
-    return results;
-}
-
-static void free_results(results_t *results)
-{
-    free(results->current_node);
-    results->current_node = NULL;
-    free(results->previous_node);
-    results->previous_node = NULL;
-    free(results);
+    return exit_code;
 }
