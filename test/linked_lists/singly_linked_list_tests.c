@@ -654,7 +654,7 @@ static void add_tests(TCase * test_cases, TFun * test_functions)
 
 Suite *singly_linked_list_test_suite(void)
 {
-    Suite *singly_linked_list_test_suite = suite_create("singly Linked List Tests");
+    Suite *singly_linked_list_test_suite = suite_create("Singly Linked List Tests");
 
     //Create sll_create tests
     TFun *sll_create_test_list = sll_create_tests;

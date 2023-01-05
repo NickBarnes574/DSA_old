@@ -14,10 +14,19 @@ struct doubly_linked_list
     size_t current_size;
 };
 
+typedef struct results
+{
+    dll_node_t *previous_node;
+    dll_node_t *current_node;
+} results_t;
+
 /// @brief Creates a new node
 /// @param data The data to be added.
 /// @return new_dll_node_t
 static dll_node_t *create_new_node(void *data);
+
+static results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position);
+static void free_results(results_t *results);
 
 doubly_linked_list_t *dll_create(void)
 {
@@ -157,39 +166,18 @@ exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t pos
     }    
     else
     {
-        size_t middle_position = list->current_size / 2; // Get the middle position of the list
-        size_t end_position = list->current_size; // Get the end position of the list
-        dll_node_t *current_node = NULL;
-
-        // Check if the position is in the first or second half of the list
-        if (position <= middle_position)
-        {
-            current_node = list->head;
-
-            // Start searching from the head
-            for (size_t current_pos = 1; current_pos < position; current_pos++)
-            {
-                current_node = current_node->next;
-            }
-        }
-        else
-        {
-            current_node = list->tail;
-
-            // Start searching from the tail
-            for (size_t current_pos = end_position; current_pos > position; current_pos--)
-            {
-                current_node = current_node->prev;
-            }
-        }
+        results_t *results = get_nodes_at_pos(list, position);
         
-        current_node->prev->next = new_node;
-        new_node->prev = current_node->prev;
+        results->current_node->prev->next = new_node;
+        new_node->prev = results->current_node->prev;
 
-        new_node->next = current_node;
-        current_node->prev = new_node;
+        new_node->next = results->current_node;
+        results->current_node->prev = new_node;
 
-        current_node = new_node;
+        results->current_node = new_node;
+
+        free(results);
+        results = NULL;
     }
 
     // 4. Increment the size of the list
@@ -248,35 +236,12 @@ void *dll_peek_position(doubly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    size_t middle_position = list->current_size / 2; // Get the middle position of the list
-    size_t end_position = list->current_size; // Get the end position of the list
-    dll_node_t *current_node = NULL;
+    results_t *results = get_nodes_at_pos(list, position);
 
-    // Check if the position is in the first or second half of the list
-    if (position <= middle_position)
-    {
-        current_node = list->head;
+    data = results->current_node->data;
 
-        // Start searching from the head
-        for (size_t current_pos = 1; current_pos < position; current_pos++)
-        {
-            current_node = current_node->next;
-        }
-        
-        data = current_node->data;
-    }
-    else
-    {
-        current_node = list->tail;
-
-        // Start searching from the tail
-        for (size_t current_pos = end_position; current_pos > position; current_pos--)
-        {
-            current_node = current_node->prev;
-        }
-
-        data = current_node->data;
-    }
+    free(results);
+    results = NULL;
 
 END:
     return data;
@@ -332,37 +297,12 @@ void *dll_pop_position(doubly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    size_t middle_position = list->current_size / 2; // Get the middle position of the list
-    size_t end_position = list->current_size; // Get the end position of the list
-    dll_node_t *current_node = NULL;
-
-    // Check if the position is in the first or second half of the list
-    if (position <= middle_position)
-    {
-        current_node = list->head;
-
-        // Start searching from the head
-        for (size_t current_pos = 1; current_pos < position; current_pos++)
-        {
-            current_node = current_node->next;
-        }
+    results_t *results = get_nodes_at_pos(list, position);
         
-        data = current_node->data;
-        dll_remove_position(list, position);
-    }
-    else
-    {
-        current_node = list->tail;
+    data = results->current_node->data;
+    dll_remove_position(list, position);
 
-        // Start searching from the tail
-        for (size_t current_pos = end_position; current_pos > position; current_pos--)
-        {
-            current_node = current_node->prev;
-        }
-        
-        data = current_node->data;
-        dll_remove_position(list, position);
-    }
+    free(results);
 
 END:
     return data;
@@ -471,36 +411,13 @@ exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
         return exit_code;  
     }
 
-    size_t middle_position = list->current_size / 2; // Get the middle position of the list
-    size_t end_position = list->current_size; // Get the end position of the list
-    dll_node_t *current_node = NULL;
+    results_t *results = get_nodes_at_pos(list, position);
 
-    // Check if the position is in the first or second half of the list
-    if (position <= middle_position)
-    {
-        current_node = list->head;
+    results->current_node->prev->next = results->current_node->next;
+    results->current_node->next->prev = results->current_node->prev->next;
 
-        // Start searching from the head
-        for (size_t current_pos = 1; current_pos < position; current_pos++)
-        {
-            current_node = current_node->next;
-        }
-    }
-    else
-    {
-        current_node = list->tail;
-
-        // Start searching from the tail
-        for (size_t current_pos = end_position; current_pos > position; current_pos--)
-        {
-            current_node = current_node->prev;
-        }
-    }
-
-    current_node->prev->next = current_node->next;
-    current_node->next->prev = current_node->prev->next;
-
-    free(current_node);
+    free(results->current_node);
+    free(results);
     
     // 4. Increment the size of the list
     list->current_size -= 1;
@@ -619,4 +536,65 @@ dll_node_t *create_new_node(void *data)
     }
 
     return new_node;
+}
+
+results_t *get_nodes_at_pos(doubly_linked_list_t *list, size_t position)
+{
+    results_t *results = calloc(1, sizeof(results_t));
+    if (NULL == results)
+    {
+        goto END;
+    }
+
+	results->previous_node = NULL;
+	results->current_node = NULL;
+
+	if ((NULL == list) || (NULL == list->head))
+	{
+		goto END;
+	}
+
+	if ((position > list->current_size) || (position == 0))
+	{
+		goto END;
+	}
+
+    size_t middle_position = list->current_size / 2; // Get the middle position of the list
+    size_t end_position = list->current_size; // Get the end position of the list
+
+    if (position <= middle_position)
+    {
+        results->current_node = list->head;
+
+        // Start searching from the head
+        for (size_t current_pos = 1; current_pos < position; current_pos++)
+        {
+            results->previous_node = results->current_node;
+            results->current_node = results->current_node->next;
+        }
+    }
+
+    else
+    {
+        results->current_node = list->tail;
+
+        // Start searching from the tail
+        for (size_t current_pos = end_position; current_pos > position; current_pos --)
+        {
+            results->previous_node = results->current_node;
+            results->current_node = results->current_node->prev;
+        }
+    }
+
+END:
+    return results;
+}
+
+static void free_results(results_t *results)
+{
+    free(results->current_node);
+    results->current_node = NULL;
+    free(results->previous_node);
+    results->previous_node = NULL;
+    free(results);
 }
