@@ -7,6 +7,8 @@ struct array_list
     size_t total_capacity;
 };
 
+static exit_code_t array_list_reallocate(array_list_t *list);
+
 array_list_t *array_list_create(size_t initial_size)
 {
     array_list_t *array_list = calloc(1, sizeof(array_list_t));
@@ -47,11 +49,37 @@ exit_code_t array_list_insert_element(array_list_t *list, void *data)
 
     memcpy(list->elements[list->current_size++], data, sizeof(data));
 
+    // Check if space needs to be reallocated
+    exit_code = array_list_reallocate(list);
+    
+    exit_code = E_SUCCESS;
 END:
     return exit_code;
 }
 
-exit_code_t array_list_reallocate(array_list_t *list)
+void *array_list_get_element(array_list_t *list, size_t index)
+{
+    void *element = NULL;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    if (index >= list->current_size)
+    {
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
+    }
+
+    element = list->elements[index];
+
+END:
+    return element;
+}
+
+exit_code_t array_list_set_element(array_list_t *list, size_t index, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -61,17 +89,12 @@ exit_code_t array_list_reallocate(array_list_t *list)
         goto END;
     }
 
-    if (list->current_size == list->total_capacity)
+    if (index >= list->current_size)
     {
-        void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
-        if (NULL == temp)
-        {
-            exit_code = E_CMR_FAILURE;
-            list->current_size--;
-            goto END;
-        }
+        
     }
 
+    exit_code = E_SUCCESS;
 END:
     return exit_code;
 }
@@ -97,4 +120,33 @@ void destroy(array_list_t *list)
 
 END:
     return;
+}
+
+exit_code_t array_list_reallocate(array_list_t *list)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    if (list->current_size == list->total_capacity)
+    {
+        void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
+        if (NULL == temp)
+        {
+            exit_code = E_CMR_FAILURE;
+            list->current_size--;
+            goto END;
+        }
+
+        list->total_capacity *= 2;
+        list->elements = temp;
+    }
+
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
 }

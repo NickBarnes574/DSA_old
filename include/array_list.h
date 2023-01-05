@@ -13,8 +13,6 @@ array_list *array_list_create(size_t initial_size);
 
 exit_code_t array_list_insert_element(array_list_t *list, void *data);
 
-exit_code_t array_list_reallocate(array_list_t *list);
-
 void *array_list_get_element(array_list_t *list, size_t index);
 
 void **array_list_get_list(array_list_t *list);
