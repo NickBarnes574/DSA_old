@@ -8,14 +8,19 @@ DSA_OBJ = \
 src/exit_codes.o \
 src/linked_lists/singly_linked_list.o\
 src/linked_lists/doubly_linked_list.o \
+src/linked_lists/circular_singly_linked_list.o \
 src/void_pointer_functions.o
 
 # individual test files
 SINGLY_LINKED_LIST_TESTS = test/linked_lists/singly_linked_list_tests.o
 DOUBLY_LINKED_LIST_TESTS = test/linked_lists/doubly_linked_list_tests.o
+CIRCULAR_SINGLY_LINKED_LIST_TESTS = test/linked_lists/circular_singly_linked_list_tests.o
 
 # combile all the tests into one list
-ALL_TESTS = test/dsa_test_all.o $(SINGLY_LINKED_LIST_TESTS) $(DOUBLY_LINKED_LIST_TESTS)
+ALL_TESTS = test/dsa_test_all.o \
+$(SINGLY_LINKED_LIST_TESTS) \
+$(DOUBLY_LINKED_LIST_TESTS) \
+$(CIRCULAR_SINGLY_LINKED_LIST_TESTS)
 
 # make a library
 .PHONY: library
