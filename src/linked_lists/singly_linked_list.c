@@ -24,7 +24,7 @@ typedef struct results
 /// @return new_sll_node_t
 static sll_node_t *create_new_node(void *data);
 
-static results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position);
+static exit_code_t get_nodes_at_pos(results_t **results_p, singly_linked_list_t *list, size_t position);
 
 singly_linked_list_t *sll_create(void)
 {
@@ -163,7 +163,14 @@ exit_code_t sll_push_position(singly_linked_list_t *list, void *data, size_t pos
     else
     {
         // Retrieve the node at the current position, as well as the previous adjacent node
-        results_t *results = get_nodes_at_pos(list, position);
+        results_t *results = NULL;
+        exit_code = get_nodes_at_pos(&results, list, position);
+        if (E_SUCCESS != exit_code)
+        {
+            free(results);
+            results = NULL;
+            goto END;
+        }
 
         new_node->next = results->current_node;
         results->previous_node->next = new_node;
@@ -231,8 +238,17 @@ void *sll_peek_position(singly_linked_list_t *list, size_t position)
     }
 
     // Retrieve the node at the current position
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
+
     data = results->current_node->data;
+
     free(results);
     results = NULL;
 
@@ -291,8 +307,18 @@ void *sll_pop_position(singly_linked_list_t *list, size_t position)
     }
 
     // Retrieve the node at the current position
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
+
+
     data = results->current_node->data;
+
     free(results);
     results = NULL;
 
@@ -355,9 +381,17 @@ exit_code_t sll_remove_tail(singly_linked_list_t *list)
     }
     else
     {
-        // Retrieve the node at the end of the list
-        results_t *results = get_nodes_at_pos(list, list->current_size);
+        results_t *results = NULL;
+        exit_code = get_nodes_at_pos(&results, list, list->current_size);
+        if (E_SUCCESS != exit_code)
+        {
+            free(results);
+            results = NULL;
+            goto END;
+        }
+
         list->tail = results->previous_node;
+
         free(results);
     }
 
@@ -404,10 +438,20 @@ exit_code_t sll_remove_position(singly_linked_list_t *list, size_t position)
     }
 
     // Retrieve the node at the current position, as well as the previous adjacent node
-    results_t *results = get_nodes_at_pos(list, position);
+    results_t *results = NULL;
+    exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
+
     results->previous_node->next = results->current_node->next;
+
     free(results->current_node);
     results->current_node = NULL;
+
     free(results);
     results = NULL;
     
@@ -518,11 +562,14 @@ END:
     return new_node;
 }
 
-results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position)
+exit_code_t get_nodes_at_pos(results_t **results_p, singly_linked_list_t *list, size_t position)
 {
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
     results_t *results = calloc(1, sizeof(results_t));
     if (NULL == results)
     {
+        exit_code = E_NULL_POINTER;
         goto END;
     }
 
@@ -531,11 +578,13 @@ results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position)
 
 	if ((NULL == list) || (NULL == list->head))
 	{
+        exit_code = E_LIST_ERROR;
 		goto END;
 	}
 
 	if ((position > list->current_size) || (position == 0))
 	{
+        exit_code = E_OUT_OF_BOUNDS;
 		goto END;
 	}
 
@@ -548,6 +597,8 @@ results_t *get_nodes_at_pos(singly_linked_list_t *list, size_t position)
         results->current_node = results->current_node->next;
     }
 
+    *results_p = results;
+    exit_code = E_SUCCESS;
 END:
-    return results;
+    return exit_code;
 }
