@@ -8,6 +8,7 @@ struct array_list
 };
 
 static exit_code_t array_list_reallocate(array_list_t *list);
+static void clear_list(array_list_t **list);
 
 array_list_t *array_list_create(size_t initial_size)
 {
@@ -47,7 +48,7 @@ exit_code_t array_list_insert_element(array_list_t *list, void *data)
         goto END;
     }
 
-    memcpy(list->elements[list->current_size++], data, sizeof(data));
+    list->elements[list->current_size++] = data;
 
     // Check if space needs to be reallocated
     exit_code = array_list_reallocate(list);
@@ -63,13 +64,11 @@ void *array_list_get_element(array_list_t *list, size_t index)
 
     if (NULL == list)
     {
-        exit_code = E_LIST_ERROR;
         goto END;
     }
 
     if (index >= list->current_size)
     {
-        exit_code = E_OUT_OF_BOUNDS;
         goto END;
     }
 
@@ -77,6 +76,21 @@ void *array_list_get_element(array_list_t *list, size_t index)
 
 END:
     return element;
+}
+
+void **array_list_get_list(array_list_t *list)
+{
+    void **result = NULL;
+
+    if (NULL == list)
+    {
+        goto END;
+    }
+
+    result = list->elements;
+
+END:
+    return result;
 }
 
 exit_code_t array_list_set_element(array_list_t *list, size_t index, void *data)
@@ -91,32 +105,74 @@ exit_code_t array_list_set_element(array_list_t *list, size_t index, void *data)
 
     if (index >= list->current_size)
     {
-        
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
     }
+
+    free(list->elements[index]);
+    list->elements[index] = data;
 
     exit_code = E_SUCCESS;
 END:
     return exit_code;
 }
 
-void destroy(array_list_t *list)
+int array_list_get_size(array_list_t *list)
+{
+    int size = -1; // Set fail state
+
+    if (list == NULL)
+    {
+        goto END;
+    }
+
+    size = (int)list->current_size;
+
+END:
+    return size;
+}
+
+int array_list_get_total_capacity(array_list_t *list)
+{
+    int capacity = -1; // Set fail state
+
+    if (list == NULL)
+    {
+        goto END;
+    }
+
+    capacity = (int)list->total_capacity;
+
+END:
+    return capacity;
+}
+
+
+void array_list_destroy(array_list_t **list)
 {
     if (NULL == list)
     {
         goto END;
     }
 
-    for (size_t idx = 0; idx < list->current_size; idx++)
+    clear_list(list);
+
+    free(*list);
+    list = NULL;
+
+END:
+    return;
+}
+
+void clear_list(array_list_t **list)
+{
+    if (NULL == list)
     {
-        free(list->elements[idx]);
-        list->elements[idx] = NULL;
+        goto END;
     }
 
-    free(list->elements);
-    list->elements = NULL;
-
-    free(list);
-    list = NULL;
+    free((*list)->elements);
+    (*list)->elements = NULL;
 
 END:
     return;

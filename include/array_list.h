@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h> // memcpy()
+#include <string.h>
 
 #include "exit_codes.h"
 
 typedef struct array_list array_list_t;
 
-array_list *array_list_create(size_t initial_size);
+array_list_t *array_list_create(size_t initial_size);
 
 exit_code_t array_list_insert_element(array_list_t *list, void *data);
 
@@ -23,6 +23,6 @@ int array_list_get_size(array_list_t *list);
 
 int array_list_get_total_capacity(array_list_t *list);
 
-void array_list_destroy(array_list *list);
+void array_list_destroy(array_list_t **list);
 
 #endif
