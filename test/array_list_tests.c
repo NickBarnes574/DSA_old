@@ -281,6 +281,106 @@ static TFun array_list_get_element_tests[] =
     NULL
 };
 
+// SET ELEMENT TESTS
+//***********************************************************************************************
+START_TEST(test_array_list_set_element_NULL_list)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    int num_1 = 10;
+
+    array_list_t *list = array_list_create(5);
+    exit_code = array_list_insert_element(list, &num_1);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    int num_2 = 76;
+
+    exit_code = array_list_set_element(NULL, 0, &num_2);
+    ck_assert_int_eq(exit_code, E_LIST_ERROR);
+    ck_assert_int_eq(num_1, 10);
+
+    array_list_destroy(&list);
+}
+END_TEST
+
+START_TEST(test_array_list_set_element_NULL_data)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    int num_1 = 10;
+
+    array_list_t *list = array_list_create(5);
+    exit_code = array_list_insert_element(list, &num_1);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    exit_code = array_list_set_element(list, 0, NULL);
+    ck_assert_int_eq(exit_code, E_NULL_POINTER);
+    ck_assert_int_eq(num_1, 10);
+
+    array_list_destroy(&list);
+}
+END_TEST
+
+START_TEST(test_array_list_set_element_int)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    int num_1 = 10;
+
+    array_list_t *list = array_list_create(5);
+    exit_code = array_list_insert_element(list, &num_1);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    // Ensure the first index now points to 'num_1'
+    ck_assert_int_eq(*((int *)list->elements[0]), 10);
+
+    int num_2 = 76;
+
+    exit_code = array_list_set_element(list, 0, &num_2);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    // Ensure the first index now points to 'num_2'
+    ck_assert_int_eq(*((int *)list->elements[0]), 76);
+
+    array_list_destroy(&list);
+}
+END_TEST
+
+START_TEST(test_array_list_set_element_string)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    const char *str_1 = "hello";
+
+    array_list_t *list = array_list_create(5);
+    exit_code = array_list_insert_element(list, &str_1);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    // Ensure the first index points to 'str_1'
+    ck_assert_int_eq(strcmp(*((char **)list->elements[0]), str_1), 0);
+
+    const char *str_2 = "world";
+
+    exit_code = array_list_set_element(list, 0, &str_2);
+    ck_assert_int_eq(exit_code, E_SUCCESS);
+
+    // Ensure the first index now points to 'str_2'
+    ck_assert_int_eq(strcmp(*((char **)list->elements[0]), str_2), 0);
+
+    array_list_destroy(&list);
+}
+END_TEST
+
+// TEST LIST
+static TFun array_list_set_element_tests[] =
+{
+    test_array_list_set_element_NULL_list,
+    test_array_list_set_element_NULL_data,
+    test_array_list_set_element_int,
+    test_array_list_set_element_string,
+    NULL
+};
+
 static void add_tests(TCase * test_cases, TFun * test_functions)
 {
     while (* test_functions)
@@ -312,6 +412,12 @@ Suite *array_list_test_suite(void)
     TCase *array_list_get_element_test_cases = tcase_create(" array_list_get_element() Tests");
     add_tests(array_list_get_element_test_cases, array_list_get_element_test_list);
     suite_add_tcase(array_list_test_suite, array_list_get_element_test_cases);
+
+    // Create array_list_set_element tests
+    TFun *array_list_set_element_test_list = array_list_set_element_tests;
+    TCase *array_list_set_element_test_cases = tcase_create(" array_list_set_element() Tests");
+    add_tests(array_list_set_element_test_cases, array_list_set_element_test_list);
+    suite_add_tcase(array_list_test_suite, array_list_set_element_test_cases);
 
     return array_list_test_suite;
 }
