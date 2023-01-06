@@ -11,6 +11,8 @@ struct array_list
 
 static exit_code_t array_list_reallocate(array_list_t *list);
 static void clear_list(array_list_t **list);
+static void collapse(array_list_t *list, size_t index);
+static void expand(array_list_t *list, size_t index);
 
 array_list_t *array_list_create(const destroy_ctx *destroy, const equal_ctx *equal)
 {
@@ -68,11 +70,8 @@ exit_code_t array_list_insert(array_list_t *list, size_t index, void *data)
         }
     }
 
-    // Get the data at the current index (src) and shift it up to the next index (dst)
-    void *dst = list->elements + index + 1;
-    void *src = list->elements + index;
-    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
-    memmove(dst, src, num_bytes);
+    // Make space for the new data
+    expand(list, index);
 
     list->elements[list->current_size++] = data;
     
@@ -123,6 +122,7 @@ exit_code_t array_list_set(array_list_t *list, size_t index, void *data)
         goto END;
     }
 
+    // destroy the data if necessary
     if (list->destroy)
     {
         list->destroy->destroy(list->elements[index], list->destroy->context);
@@ -151,16 +151,14 @@ exit_code_t array_list_remove(array_list_t *list, size_t index)
         goto END;
     }
 
+    // destroy the data if necessary
     if (list->destroy)
     {
         list->destroy->destroy(list->elements[index], list->destroy->context);
     }
 
-    // Get the data at the next index (src) and shift it down to the current index (dst)
-    void *dst = list->elements + index;
-    void *src = list->elements + index + 1;
-    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
-    memmove(dst, src, num_bytes);
+    // close the empty gap
+    collapse(list, index);
 
     exit_code = E_SUCCESS;
 END:
@@ -191,6 +189,7 @@ bool array_list_contains(array_list_t *list, void *data)
         goto END;
     }
 
+    // Check if the the data is in the list
     for (size_t idx = 0; idx < list->current_size; idx++)
     {
         if (true == list->equal->equal(list->elements[idx], data, list->equal->ctx))
@@ -201,6 +200,33 @@ bool array_list_contains(array_list_t *list, void *data)
 
 END:
     return contains_data;
+}
+
+exit_code_t array_list_reallocate(array_list_t *list)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    // Attempt to double the size of the array list
+    void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
+    if (NULL == temp)
+    {
+        exit_code = E_CMR_FAILURE;
+        list->current_size--;
+        goto END;
+    }
+
+    list->total_capacity *= 2;  // update the capacity
+    list->elements = temp;
+
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
 }
 
 void array_list_destroy(array_list_t **list)
@@ -226,6 +252,7 @@ void clear_list(array_list_t **list)
         goto END;
     }
 
+    // destroy the data if necessary
     if ((*list)->destroy)
     {
         for (size_t idx = 0; idx < (*list)->current_size; idx++)
@@ -241,28 +268,26 @@ END:
     return;
 }
 
-exit_code_t array_list_reallocate(array_list_t *list)
+void collapse(array_list_t *list, size_t index)
 {
-    exit_code_t exit_code = E_DEFAULT_ERROR;
+    void *dst = list->elements + index;     // current element
+    void *src = list->elements + index + 1; // next element
 
-    if (NULL == list)
-    {
-        exit_code = E_LIST_ERROR;
-        goto END;
-    }
+    // number of bytes to be copied
+    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
 
-    void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
-    if (NULL == temp)
-    {
-        exit_code = E_CMR_FAILURE;
-        list->current_size--;
-        goto END;
-    }
+    // shift the next element down
+    memmove(dst, src, num_bytes);
+}
 
-    list->total_capacity *= 2;
-    list->elements = temp;
+void expand(array_list_t *list, size_t index)
+{
+    void *dst = list->elements + index + 1; // next element
+    void *src = list->elements + index;     // current element
 
-    exit_code = E_SUCCESS;
-END:
-    return exit_code;
+    // number of bytes to be copied
+    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
+
+    // shift the current element up
+    memmove(dst, src, num_bytes);
 }
