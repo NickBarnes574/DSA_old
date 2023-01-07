@@ -48,7 +48,7 @@ exit_code_t array_list_insert(array_list_t *list, size_t index, void *data)
         goto END;
     }
 
-    if (index >= list->current_size)
+    if (index > list->current_size)
     {
         exit_code = E_OUT_OF_BOUNDS;
         goto END;
@@ -286,7 +286,7 @@ void expand(array_list_t *list, size_t index)
     void *src = list->elements + index;     // current element
 
     // number of bytes to be copied
-    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
+    size_t num_bytes = (list->current_size - index) * sizeof(*list->elements);
 
     // shift the current element up
     memmove(dst, src, num_bytes);
