@@ -256,6 +256,24 @@ END:
     return exit_code;
 }
 
+bool array_list_is_empty(array_list_t *list)
+{
+    bool is_empty = false;
+
+    if (NULL == list)
+    {
+        goto END;
+    }
+
+    if (list->current_size == 0)
+    {
+        is_empty = true;
+    }
+
+END:
+    return is_empty;
+}
+
 void array_list_destroy(array_list_t **list)
 {
     if (NULL == list)

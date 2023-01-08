@@ -30,6 +30,8 @@ exit_code_t array_list_set(array_list_t *list, size_t index, void *data);
 
 size_t array_list_size(array_list_t *list);
 
+bool array_list_is_empty(array_list_t *list);
+
 void array_list_destroy(array_list_t **list);
 
 #endif
