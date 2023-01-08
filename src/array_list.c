@@ -80,6 +80,33 @@ END:
     return exit_code;
 }
 
+exit_code_t push(array_list_t *list, void *data)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    if (NULL == data)
+    {
+        exit_code = E_NULL_POINTER;
+        goto END;
+    }
+
+    exit_code = array_list_insert(list, list->current_size, data);
+    if (NULL == exit_code)
+    {
+        goto END;
+    }
+
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
+}
+
 void *array_list_get(array_list_t *list, size_t index)
 {
     void *element = NULL;
@@ -273,10 +300,12 @@ void collapse(array_list_t *list, size_t index)
     void *dst = list->elements + index;     // current element
     void *src = list->elements + index + 1; // next element
 
-    // number of bytes to be copied
-    size_t num_bytes = (--list->current_size - index) * sizeof(*list->elements);
+    list->current_size--; // shorten the list by 1 element
 
-    // shift the next element down
+    // number of bytes to be copied
+    size_t num_bytes = (list->current_size - index) * sizeof(*list->elements);
+
+    // shift the next element forward
     memmove(dst, src, num_bytes);
 }
 
@@ -288,6 +317,6 @@ void expand(array_list_t *list, size_t index)
     // number of bytes to be copied
     size_t num_bytes = (list->current_size - index) * sizeof(*list->elements);
 
-    // shift the current element up
+    // shift the current element backward
     memmove(dst, src, num_bytes);
 }

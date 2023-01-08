@@ -18,6 +18,8 @@ array_list_t *array_list_create(const destroy_ctx *destroy, const equal_ctx *equ
 
 exit_code_t array_list_insert(array_list_t *list, size_t index, void *data);
 
+exit_code_t push(array_list_t *list, void *data);
+
 exit_code_t array_list_remove(array_list_t *list, size_t index);
 
 bool array_list_contains(array_list_t *list, void *data);
