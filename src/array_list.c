@@ -5,12 +5,16 @@ struct array_list
     void **elements;
     size_t current_size;
     size_t total_capacity;
+    const destroy_ctx *destroy;
+    const equal_ctx *equal;
 };
 
 static exit_code_t array_list_reallocate(array_list_t *list);
 static void clear_list(array_list_t **list);
+static void collapse(array_list_t *list, size_t index);
+static void expand(array_list_t *list, size_t index);
 
-array_list_t *array_list_create(size_t initial_size)
+array_list_t *array_list_create(const destroy_ctx *destroy, const equal_ctx *equal)
 {
     array_list_t *array_list = calloc(1, sizeof(array_list_t));
     if (NULL == array_list)
@@ -18,7 +22,7 @@ array_list_t *array_list_create(size_t initial_size)
         goto END;
     }
 
-    array_list->elements = calloc(initial_size, sizeof(void*));
+    array_list->elements = calloc(INITIAL_CAPACITY, sizeof(void*));
     if (NULL == array_list->elements)
     {
         free(array_list);
@@ -26,13 +30,57 @@ array_list_t *array_list_create(size_t initial_size)
     }
 
     array_list->current_size = 0;
-    array_list->total_capacity = initial_size;
+    array_list->total_capacity = INITIAL_CAPACITY;
+    array_list->destroy = destroy;
+    array_list->equal = equal;
 
 END:
     return array_list;
 }
 
-exit_code_t array_list_insert_element(array_list_t *list, void *data)
+exit_code_t array_list_insert(array_list_t *list, size_t index, void *data)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    if (index > list->current_size)
+    {
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
+    }
+
+    if (NULL == data)
+    {
+        exit_code = E_NULL_POINTER;
+        goto END;
+    }
+
+    // Check if space needs to be reallocated
+    if (list->current_size == list->total_capacity)
+    {
+        exit_code = array_list_reallocate(list);
+        if (E_SUCCESS != exit_code)
+        {
+            goto END;
+        }
+    }
+
+    // Make space for the new data
+    expand(list, index);
+
+    list->elements[list->current_size++] = data;
+    
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
+}
+
+exit_code_t push(array_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -48,24 +96,18 @@ exit_code_t array_list_insert_element(array_list_t *list, void *data)
         goto END;
     }
 
-    list->elements[list->current_size++] = data;
-
-    // Check if space needs to be reallocated
-    if (list->current_size == list->total_capacity)
+    exit_code = array_list_insert(list, list->current_size, data);
+    if (NULL == exit_code)
     {
-        exit_code = array_list_reallocate(list);
-        if (E_SUCCESS != exit_code)
-        {
-            goto END;
-        }
+        goto END;
     }
-    
+
     exit_code = E_SUCCESS;
 END:
     return exit_code;
 }
 
-void *array_list_get_element(array_list_t *list, size_t index)
+void *array_list_get(array_list_t *list, size_t index)
 {
     void *element = NULL;
 
@@ -85,22 +127,7 @@ END:
     return element;
 }
 
-void **array_list_get_list(array_list_t *list)
-{
-    void **result = NULL;
-
-    if (NULL == list)
-    {
-        goto END;
-    }
-
-    result = list->elements;
-
-END:
-    return result;
-}
-
-exit_code_t array_list_set_element(array_list_t *list, size_t index, void *data)
+exit_code_t array_list_set(array_list_t *list, size_t index, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -110,16 +137,22 @@ exit_code_t array_list_set_element(array_list_t *list, size_t index, void *data)
         goto END;
     }
 
+    if (index >= list->current_size)
+    {
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
+    }
+
     if (NULL == data)
     {
         exit_code = E_NULL_POINTER;
         goto END;
     }
 
-    if (index >= list->current_size)
+    // destroy the data if necessary
+    if (list->destroy)
     {
-        exit_code = E_OUT_OF_BOUNDS;
-        goto END;
+        list->destroy->destroy(list->elements[index], list->destroy->context);
     }
 
     list->elements[index] = data;
@@ -129,7 +162,37 @@ END:
     return exit_code;
 }
 
-int array_list_get_size(array_list_t *list)
+exit_code_t array_list_remove(array_list_t *list, size_t index)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    if (index >= list->current_size)
+    {
+        exit_code = E_OUT_OF_BOUNDS;
+        goto END;
+    }
+
+    // destroy the data if necessary
+    if (list->destroy)
+    {
+        list->destroy->destroy(list->elements[index], list->destroy->context);
+    }
+
+    // close the empty gap
+    collapse(list, index);
+
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
+}
+
+size_t array_list_size(array_list_t *list)
 {
     int size = -1; // Set fail state
 
@@ -144,21 +207,54 @@ END:
     return size;
 }
 
-int array_list_get_total_capacity(array_list_t *list)
+bool array_list_contains(array_list_t *list, void *data)
 {
-    int capacity = -1; // Set fail state
+    bool contains_data = false;
 
-    if (list == NULL)
+    if ((NULL == list) || (NULL == data))
     {
         goto END;
     }
 
-    capacity = (int)list->total_capacity;
+    // Check if the the data is in the list
+    for (size_t idx = 0; idx < list->current_size; idx++)
+    {
+        if (true == list->equal->equal(list->elements[idx], data, list->equal->ctx))
+        {
+            contains_data = true;
+        }
+    }
 
 END:
-    return capacity;
+    return contains_data;
 }
 
+exit_code_t array_list_reallocate(array_list_t *list)
+{
+    exit_code_t exit_code = E_DEFAULT_ERROR;
+
+    if (NULL == list)
+    {
+        exit_code = E_LIST_ERROR;
+        goto END;
+    }
+
+    // Attempt to double the size of the array list
+    void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
+    if (NULL == temp)
+    {
+        exit_code = E_CMR_FAILURE;
+        list->current_size--;
+        goto END;
+    }
+
+    list->total_capacity *= 2;  // update the capacity
+    list->elements = temp;
+
+    exit_code = E_SUCCESS;
+END:
+    return exit_code;
+}
 
 void array_list_destroy(array_list_t **list)
 {
@@ -183,6 +279,15 @@ void clear_list(array_list_t **list)
         goto END;
     }
 
+    // destroy the data if necessary
+    if ((*list)->destroy)
+    {
+        for (size_t idx = 0; idx < (*list)->current_size; idx++)
+        {
+            (*list)->destroy->destroy((*list)->elements[idx], (*list)->destroy->context);
+        }
+    }
+
     free((*list)->elements);
     (*list)->elements = NULL;
 
@@ -190,28 +295,28 @@ END:
     return;
 }
 
-exit_code_t array_list_reallocate(array_list_t *list)
+void collapse(array_list_t *list, size_t index)
 {
-    exit_code_t exit_code = E_DEFAULT_ERROR;
+    void *dst = list->elements + index;     // current element
+    void *src = list->elements + index + 1; // next element
 
-    if (NULL == list)
-    {
-        exit_code = E_LIST_ERROR;
-        goto END;
-    }
+    list->current_size--; // shorten the list by 1 element
 
-    void **temp = realloc(list->elements, (list->total_capacity * 2) * (sizeof(*list->elements)));
-    if (NULL == temp)
-    {
-        exit_code = E_CMR_FAILURE;
-        list->current_size--;
-        goto END;
-    }
+    // number of bytes to be copied
+    size_t num_bytes = (list->current_size - index) * sizeof(*list->elements);
 
-    list->total_capacity *= 2;
-    list->elements = temp;
+    // shift the next element forward
+    memmove(dst, src, num_bytes);
+}
 
-    exit_code = E_SUCCESS;
-END:
-    return exit_code;
+void expand(array_list_t *list, size_t index)
+{
+    void *dst = list->elements + index + 1; // next element
+    void *src = list->elements + index;     // current element
+
+    // number of bytes to be copied
+    size_t num_bytes = (list->current_size - index) * sizeof(*list->elements);
+
+    // shift the current element backward
+    memmove(dst, src, num_bytes);
 }
