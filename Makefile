@@ -12,7 +12,8 @@ src/linked_lists/circular_singly_linked_list.o \
 src/array_list.o \
 src/void_pointer_functions.o \
 src/utilities/comparison_helpers.o \
-src/utilities/destroy_helpers.o
+src/utilities/destroy_helpers.o \
+src/utilities/swap.o
 
 # individual test files
 SINGLY_LINKED_LIST_TESTS = test/linked_lists/singly_linked_list_tests.o
