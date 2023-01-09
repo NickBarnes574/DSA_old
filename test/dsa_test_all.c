@@ -7,6 +7,7 @@ extern Suite *singly_linked_list_test_suite(void);
 extern Suite *doubly_linked_list_test_suite(void);
 extern Suite *circular_singly_linked_list_test_suite(void);
 extern Suite *array_list_test_suite(void);
+extern Suite *insertion_sort_test_suite(void);
 
 int run_linked_list_tests()
 {
@@ -97,6 +98,38 @@ END:
     return (tests_failed == 0) ? 0 : 1;
 }
 
+int run_insertion_sort_tests()
+{
+    //create test suite runner
+    SRunner *sr_is = srunner_create(NULL);
+
+    // prepare the test suites
+    srunner_add_suite(sr_is, insertion_sort_test_suite());
+
+    // run the Linked List test suites
+    printf("-------------------------------------------------------------------------------------------------------\n");
+    printf("                                         INSERTION SORT TESTS\n");
+    printf("-------------------------------------------------------------------------------------------------------\n");
+    srunner_run_all(sr_is, CK_VERBOSE);
+    printf("\n");
+
+    // report the test failed status
+    int tests_failed = 0;
+
+    // Array List
+    tests_failed = srunner_ntests_failed(sr_is);
+    if (0 != tests_failed)
+    {
+        perror("insertion sort test failure\n");
+        goto END;
+    }
+
+END:
+    srunner_free(sr_is);
+    // return 1 or 0 based on whether or not tests failed
+    return (tests_failed == 0) ? 0 : 1;
+}
+
 int main(int argc, char** argv)
 {
     // Suppress unused parameter warnings
@@ -106,6 +139,7 @@ int main(int argc, char** argv)
 
     bool linked_list = true;
     bool array_list = true;
+    bool insertion_sort = true;
 
     // Run linked list tests
     if (true == linked_list)
@@ -121,6 +155,16 @@ int main(int argc, char** argv)
     if (true == array_list)
     {
         result = run_array_list_tests();
+        if (0 != result)
+        {
+            goto END;
+        }
+    }
+
+    // Run array list tests
+    if (true == insertion_sort)
+    {
+        result = run_insertion_sort_tests();
         if (0 != result)
         {
             goto END;

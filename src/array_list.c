@@ -80,7 +80,7 @@ END:
     return exit_code;
 }
 
-exit_code_t push(array_list_t *list, void *data)
+exit_code_t array_list_push(array_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -97,7 +97,7 @@ exit_code_t push(array_list_t *list, void *data)
     }
 
     exit_code = array_list_insert(list, list->current_size, data);
-    if (NULL == exit_code)
+    if (E_SUCCESS != exit_code)
     {
         goto END;
     }
