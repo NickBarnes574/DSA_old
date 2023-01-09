@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "exit_codes.h"
-#include "linked_lists/singly_linked_list.h"
-#include "array_list.h"
+#include "../../utilities/exit_codes/exit_codes.h"
+#include "../../lists/linked_lists/singly_linked_list/singly_linked_list.h"
+#include "../../lists/array_list/array_list.h"
 
 typedef struct vertex
 {

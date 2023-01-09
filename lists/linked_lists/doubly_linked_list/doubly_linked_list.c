@@ -1,35 +1,36 @@
-#include "linked_lists/circular_singly_linked_list.h"
+#include "doubly_linked_list.h"
 
-struct csll_node
+struct dll_node
 {
     void *data;
-    csll_node_t *next;
+    dll_node_t *next;
+    dll_node_t *prev;
 };
 
-struct circular_singly_linked_list
+struct doubly_linked_list
 {
-    csll_node_t *head;
-    csll_node_t *tail;
+    dll_node_t *head;
+    dll_node_t *tail;
     size_t current_size;
 };
 
 typedef struct results
 {
-    csll_node_t *previous_node;
-    csll_node_t *current_node;
+    dll_node_t *previous_node;
+    dll_node_t *current_node;
 } results_t;
 
 /// @brief Creates a new node
 /// @param data The data to be added.
-/// @return new_csll_node_t
-static csll_node_t *create_new_node(void *data);
+/// @return new_dll_node_t
+static dll_node_t *create_new_node(void *data);
 
-static exit_code_t get_nodes_at_pos(results_t **results_p, circular_singly_linked_list_t *list, size_t position);
+static exit_code_t get_nodes_at_pos(results_t **results_p, doubly_linked_list_t *list, size_t position);
 
-circular_singly_linked_list_t *csll_create(void)
+doubly_linked_list_t *dll_create(void)
 {
     // 1. Create the list
-    circular_singly_linked_list_t *list = calloc(1, sizeof(circular_singly_linked_list_t));
+    doubly_linked_list_t *list = calloc(1, sizeof(doubly_linked_list_t));
 
     // 2. Check if memory allocation was successful
     if (NULL != list)
@@ -42,7 +43,7 @@ circular_singly_linked_list_t *csll_create(void)
     return list;
 }
 
-exit_code_t csll_push_head(circular_singly_linked_list_t *list, void *data)
+exit_code_t dll_push_head(doubly_linked_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -60,7 +61,7 @@ exit_code_t csll_push_head(circular_singly_linked_list_t *list, void *data)
         goto END;
     }
 
-    csll_node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 3. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -72,6 +73,7 @@ exit_code_t csll_push_head(circular_singly_linked_list_t *list, void *data)
     else
     {
         // b. Insert node at the front of the list
+        list->head->prev = new_node;
         new_node->next = list->head;
         list->head = new_node;
     }
@@ -84,7 +86,7 @@ END:
     return exit_code;
 }
 
-exit_code_t csll_push_tail(circular_singly_linked_list_t *list, void *data)
+exit_code_t dll_push_tail(doubly_linked_list_t *list, void *data)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -102,7 +104,7 @@ exit_code_t csll_push_tail(circular_singly_linked_list_t *list, void *data)
         goto END;
     }
 
-    csll_node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 3. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -115,6 +117,7 @@ exit_code_t csll_push_tail(circular_singly_linked_list_t *list, void *data)
     {
         // b. Insert node at the back of the list
         list->tail->next = new_node;
+        new_node->prev = list->tail;
         list->tail = new_node;
     }
 
@@ -126,7 +129,7 @@ END:
     return exit_code;
 }
 
-exit_code_t csll_push_position(circular_singly_linked_list_t *list, void *data, size_t position)
+exit_code_t dll_push_position(doubly_linked_list_t *list, void *data, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
@@ -145,13 +148,13 @@ exit_code_t csll_push_position(circular_singly_linked_list_t *list, void *data, 
     }
 
     // 3. Check if position is out of range
-    if ((position > list->current_size) || (position == 0))
+    if (position > list->current_size || position == 0)
     {
         exit_code = E_OUT_OF_BOUNDS;
         goto END;
     }
 
-    csll_node_t *new_node = create_new_node(data); // Create a new node
+    dll_node_t *new_node = create_new_node(data); // Create a new node
 
     // 4. Determine links based on whether or not list is empty
     if (NULL == list->head)
@@ -162,7 +165,6 @@ exit_code_t csll_push_position(circular_singly_linked_list_t *list, void *data, 
     }    
     else
     {
-        // Retrieve the node at the current position, as well as the previous adjacent node
         results_t *results = NULL;
         exit_code = get_nodes_at_pos(&results, list, position);
         if (E_SUCCESS != exit_code)
@@ -171,9 +173,12 @@ exit_code_t csll_push_position(circular_singly_linked_list_t *list, void *data, 
             results = NULL;
             goto END;
         }
+        
+        results->current_node->prev->next = new_node;
+        new_node->prev = results->current_node->prev;
 
         new_node->next = results->current_node;
-        results->previous_node->next = new_node;
+        results->current_node->prev = new_node;
 
         results->current_node = new_node;
 
@@ -189,11 +194,11 @@ END:
     return exit_code;
 }
 
-void *csll_peek_head(circular_singly_linked_list_t *list)
+void *dll_peek_head(doubly_linked_list_t *list)
 {
     void *data = NULL;
 
-    // Check if list exists or is empty
+    // Check if list does not exist or is empty
     if ((NULL == list) || (NULL == list->head))
     {
         goto END;
@@ -205,12 +210,12 @@ END:
     return data;
 }
 
-void *csll_peek_tail(circular_singly_linked_list_t *list)
+void *dll_peek_tail(doubly_linked_list_t *list)
 {
     void *data = NULL;
 
-    // Check if list exists or is empty
-    if ((NULL == list) || (NULL == list->head))
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
     {
         goto END;
     }
@@ -221,80 +226,11 @@ END:
     return data;
 }
 
-void *csll_peek_position(circular_singly_linked_list_t *list, size_t position)
+void *dll_peek_position(doubly_linked_list_t *list, size_t position)
 {
     void *data = NULL;
 
-    // Check if list exists or is empty
-    if ((NULL == list) || (NULL == list->head))
-    {
-        goto END;
-    }
-
-    // Check if position is out of range
-    if (position > list->current_size || position == 0)
-    {
-        goto END;
-    }
-
-    // Retrieve the node at the current position
-    results_t *results = NULL;
-    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
-    if (E_SUCCESS != exit_code)
-    {
-        free(results);
-        results = NULL;
-        goto END;
-    }
-
-    data = results->current_node->data;
-
-    free(results);
-    results = NULL;
-
-END:
-    return data;
-}
-
-void *csll_pop_head(circular_singly_linked_list_t *list)
-{
-    void *data = NULL;
-    
-    // Check if list exists or is empty
-    if ((NULL == list) || (NULL == list->head))
-    {
-        goto END;
-    }
-
-    data = list->head->data;
-    csll_remove_head(list);
-
-END:
-    return data;
-}
-
-void *csll_pop_tail(circular_singly_linked_list_t *list)
-{
-    void *data = NULL;
-    
-    // Check if list exists or is empty
-    if ((NULL == list) || (NULL == list->head))
-    {
-        goto END;
-    }
-
-    data = list->tail->data;
-    csll_remove_tail(list);
-
-END:
-    return data;
-}
-
-void *csll_pop_position(circular_singly_linked_list_t *list, size_t position)
-{
-    void *data = NULL;
-    
-    // Check if list exists or is empty
+    // Check if list does not exist or is empty
     if ((NULL == list) || (NULL == list->head))
     {
         goto END;
@@ -306,7 +242,6 @@ void *csll_pop_position(circular_singly_linked_list_t *list, size_t position)
         goto END;
     }
 
-    // Retrieve the node at the current position
     results_t *results = NULL;
     exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
     if (E_SUCCESS != exit_code)
@@ -316,23 +251,88 @@ void *csll_pop_position(circular_singly_linked_list_t *list, size_t position)
         goto END;
     }
 
-
     data = results->current_node->data;
 
     free(results);
     results = NULL;
 
-    csll_remove_position(list, position);
+END:
+    return data;
+}
+
+void *dll_pop_head(doubly_linked_list_t *list)
+{
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
+    {
+        goto END;
+    }
+
+    data = list->head->data;
+    dll_remove_head(list);
 
 END:
     return data;
 }
 
-exit_code_t csll_remove_head(circular_singly_linked_list_t *list)
+void *dll_pop_tail(doubly_linked_list_t *list)
+{
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->tail))
+    {
+        goto END;
+    }
+
+    data = list->tail->data;
+    dll_remove_tail(list);
+
+END:
+    return data;
+}
+
+void *dll_pop_position(doubly_linked_list_t *list, size_t position)
+{
+    void *data = NULL;
+
+    // Check if list does not exist or is empty
+    if ((NULL == list) || (NULL == list->head))
+    {
+        goto END;
+    }
+
+    // 3. Check if position is out of range
+    if (position > list->current_size || position == 0)
+    {
+        goto END;
+    }
+
+    results_t *results = NULL;
+    exit_code_t exit_code = get_nodes_at_pos(&results, list, position);
+    if (E_SUCCESS != exit_code)
+    {
+        free(results);
+        results = NULL;
+        goto END;
+    }
+        
+    data = results->current_node->data;
+    dll_remove_position(list, position);
+
+    free(results);
+
+END:
+    return data;
+}
+
+exit_code_t dll_remove_head(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if list does not exist or is empty
+    // Check if list does not exist or is empty
     if ((NULL == list) || (NULL == list->head))
     {
         exit_code = E_LIST_ERROR;
@@ -347,7 +347,7 @@ exit_code_t csll_remove_head(circular_singly_linked_list_t *list)
     }
     else
     {
-        csll_node_t *temp = list->head->next;
+        dll_node_t *temp = list->head->next;
 
         free(list->head);
         list->head = NULL;
@@ -362,11 +362,11 @@ END:
     return exit_code;
 }
 
-exit_code_t csll_remove_tail(circular_singly_linked_list_t *list)
+exit_code_t dll_remove_tail(doubly_linked_list_t *list)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // set the fail state
 
-    // 1. Check if list does not exist or is empty
+    // Check if list does not exist or is empty
     if ((NULL == list) || (NULL == list->tail))
     {
         exit_code = E_LIST_ERROR;
@@ -374,29 +374,21 @@ exit_code_t csll_remove_tail(circular_singly_linked_list_t *list)
     }
 
     // 3. Check if there is only one node in the list
-    if (NULL == list->head->next)
+    if (NULL == list->tail->prev)
     {
         free(list->tail);
         list->tail = NULL;
     }
     else
     {
-        results_t *results = NULL;
-        exit_code = get_nodes_at_pos(&results, list, list->current_size);
-        if (E_SUCCESS != exit_code)
-        {
-            free(results);
-            results = NULL;
-            goto END;
-        }
+        dll_node_t *temp = list->tail->prev;
 
-        list->tail = results->previous_node;
+        free(list->tail);
+        list->tail = NULL;
 
-        free(results);
+        list->tail = temp;
+        list->tail->next = NULL;
     }
-
-    free(list->tail->next);
-    list->tail->next = list->head;
 
     list->current_size -= 1;
 
@@ -405,11 +397,11 @@ END:
     return exit_code;
 }
 
-exit_code_t csll_remove_position(circular_singly_linked_list_t *list, size_t position)
+exit_code_t dll_remove_position(doubly_linked_list_t *list, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR; // Set the fail state
 
-    // 1. Check if list does not exist or is empty
+    // Check if list does not exist or is empty
     if ((NULL == list) || (NULL == list->head))
     {
         exit_code = E_LIST_ERROR;
@@ -426,18 +418,19 @@ exit_code_t csll_remove_position(circular_singly_linked_list_t *list, size_t pos
     // 4. Check if position is at the head
     if (position == 1)
     {
-        exit_code = csll_remove_head(list);
-        goto END; 
+        exit_code = dll_remove_head(list);
+
+        return exit_code;    
     }
 
     // 5. Check if position is at the tail
     if (position == list->current_size)
     {
-        exit_code = csll_remove_tail(list);
-        goto END;  
+        exit_code = dll_remove_tail(list);
+
+        return exit_code;  
     }
 
-    // Retrieve the node at the current position, as well as the previous adjacent node
     results_t *results = NULL;
     exit_code = get_nodes_at_pos(&results, list, position);
     if (E_SUCCESS != exit_code)
@@ -447,13 +440,11 @@ exit_code_t csll_remove_position(circular_singly_linked_list_t *list, size_t pos
         goto END;
     }
 
-    results->previous_node->next = results->current_node->next;
+    results->current_node->prev->next = results->current_node->next;
+    results->current_node->next->prev = results->current_node->prev->next;
 
     free(results->current_node);
-    results->current_node = NULL;
-
     free(results);
-    results = NULL;
     
     // 4. Increment the size of the list
     list->current_size -= 1;
@@ -463,7 +454,7 @@ END:
     return exit_code;    
 }
 
-exit_code_t csll_print_list(circular_singly_linked_list_t *list, void (*function_ptr)(void *))
+exit_code_t dll_print_list(doubly_linked_list_t *list, void (*function_ptr)(void *), bool reverse)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -481,17 +472,32 @@ exit_code_t csll_print_list(circular_singly_linked_list_t *list, void (*function
         goto END;
     }
 
-    csll_node_t *current_node = NULL; // Create a current node
+    dll_node_t *current_node = NULL; // Create a current node
 
-    current_node = list->head;
+    // 3. Set the current node to tail if reverse flag is true
+    if (reverse)
+    {
+        current_node = list->tail;
+    }
+    else
+    {
+        current_node = list->head;
+    }
     
-
     // 4. Print the list
     while (NULL != current_node)
     {
         (*function_ptr)(current_node->data);
 
-        current_node = current_node->next;
+        // a. Print the list in reverse if reverse flag is set
+        if (reverse)
+        {
+            current_node = current_node->prev;
+        }
+        else
+        {
+            current_node = current_node->next;
+        }
     }
 
     exit_code = E_SUCCESS;
@@ -499,7 +505,7 @@ END:
     return exit_code;
 }
 
-void csll_clear_list(circular_singly_linked_list_t **list)
+void dll_clear_list(doubly_linked_list_t **list)
 {
     // 1. Check if list is empty
     if (NULL == list)
@@ -507,11 +513,11 @@ void csll_clear_list(circular_singly_linked_list_t **list)
         goto END;
     }
 
-    csll_node_t *current_node = (*list)->head;
-    csll_node_t *next_node = NULL;
+    dll_node_t *current_node = (*list)->head;
+    dll_node_t *next_node = NULL;
 
     // 2. Clear out all the nodes in the list
-    for (size_t idx = 0; idx < (*list)->current_size; idx++)
+    while (NULL != current_node)
     {
         next_node = current_node->next;
         free(current_node);
@@ -526,7 +532,7 @@ END:
     return;
 }
 
-void csll_destroy_list(circular_singly_linked_list_t **list)
+void dll_destroy_list(doubly_linked_list_t **list)
 {
     // 1. Check if list is empty
     if (NULL == list)
@@ -535,7 +541,7 @@ void csll_destroy_list(circular_singly_linked_list_t **list)
     }
 
     // 2. Clear out all the nodes
-    csll_clear_list(list);
+    dll_clear_list(list);
 
     // 3. Destroy the list container
     free(*list);
@@ -545,24 +551,21 @@ END:
     return;
 }
 
-csll_node_t *create_new_node(void *data)
+dll_node_t *create_new_node(void *data)
 {
     // 1. Allocate memory for new node
-    csll_node_t *new_node = calloc(1, sizeof(csll_node_t));
-    if (NULL == new_node)
+    dll_node_t *new_node = calloc(1, sizeof(dll_node_t));
+    if (NULL != new_node)
     {
-        goto END;
+        new_node->data = data;
+        new_node->next = NULL;
+        new_node->prev = NULL;
     }
 
-    // 2. Initialize pointers
-    new_node->data = data;
-    new_node->next = NULL;
-
-END:
     return new_node;
 }
 
-exit_code_t get_nodes_at_pos(results_t **results_p, circular_singly_linked_list_t *list, size_t position)
+exit_code_t get_nodes_at_pos(results_t **results_p, doubly_linked_list_t *list, size_t position)
 {
     exit_code_t exit_code = E_DEFAULT_ERROR;
 
@@ -588,13 +591,31 @@ exit_code_t get_nodes_at_pos(results_t **results_p, circular_singly_linked_list_
 		goto END;
 	}
 
-    results->current_node = list->head;
+    size_t middle_position = list->current_size / 2; // Get the middle position of the list
+    size_t end_position = list->current_size; // Get the end position of the list
 
-    // Start searching from the head
-    for (size_t current_pos = 1; current_pos < position; current_pos++)
+    if (position <= middle_position)
     {
-        results->previous_node = results->current_node;
-        results->current_node = results->current_node->next;
+        results->current_node = list->head;
+
+        // Start searching from the head
+        for (size_t current_pos = 1; current_pos < position; current_pos++)
+        {
+            results->previous_node = results->current_node;
+            results->current_node = results->current_node->next;
+        }
+    }
+
+    else
+    {
+        results->current_node = list->tail;
+
+        // Start searching from the tail
+        for (size_t current_pos = end_position; current_pos > position; current_pos --)
+        {
+            results->previous_node = results->current_node;
+            results->current_node = results->current_node->prev;
+        }
     }
 
     *results_p = results;

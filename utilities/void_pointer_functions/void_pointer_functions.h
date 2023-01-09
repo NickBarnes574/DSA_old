@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "exit_codes.h"
+#include "../exit_codes/exit_codes.h"
 
 // INTEGER FUNCTIONS
 

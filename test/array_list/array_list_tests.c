@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "array_list.h"
-#include "void_pointer_functions.h"
-#include "exit_codes.h"
+#include "../../lists/array_list/array_list.h"
+#include "../../utilities/void_pointer_functions/void_pointer_functions.h"
+#include "../../utilities/exit_codes/exit_codes.h"
 
 struct array_list
 {

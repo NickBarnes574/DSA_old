@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "exit_codes.h"
+#include "../../../utilities/exit_codes/exit_codes.h"
 
 typedef struct sll_node sll_node_t;
 typedef struct singly_linked_list singly_linked_list_t;

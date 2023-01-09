@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "linked_lists/doubly_linked_list.h"
-#include "void_pointer_functions.h"
-#include "exit_codes.h"
+#include "../../lists/linked_lists/doubly_linked_list/doubly_linked_list.h"
+#include "../../utilities/void_pointer_functions/void_pointer_functions.h"
+#include "../../utilities/exit_codes/exit_codes.h"
 
 struct dll_node
 {

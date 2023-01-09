@@ -6,9 +6,9 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "exit_codes.h"
-#include "utilities/destroy.h"
-#include "utilities/comparisons.h"
+#include "../../utilities/exit_codes/exit_codes.h"
+#include "../../utilities/destroy.h"
+#include "../../utilities/comparisons.h"
 
 #define INITIAL_CAPACITY 5
 

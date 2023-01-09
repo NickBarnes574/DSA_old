@@ -2,7 +2,7 @@
 #define DESTROY_HELPERS_H
 
 #include <stdlib.h>
-#include "destroy.h"
+#include "../destroy.h"
 
 void naive_destroy(void *data, const void *context);
 

@@ -1,5 +1,5 @@
-#include "utilities/comparison_helpers.h"
-#include "utilities/comparisons.h"
+#include "comparison_helpers.h"
+#include "../comparisons.h"
 
 int int_comp(const void *x, const void *y, const void *ctx)
 {

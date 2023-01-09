@@ -5,21 +5,21 @@ CFLAGS += -Wall -Wextra -Wpedantic -Waggregate-return -Wwrite-strings -Wfloat-eq
 CFLAGS += -I ./include/
 
 DSA_OBJ = \
-src/exit_codes.o \
-src/linked_lists/singly_linked_list.o\
-src/linked_lists/doubly_linked_list.o \
-src/linked_lists/circular_singly_linked_list.o \
-src/array_list.o \
-src/void_pointer_functions.o \
-src/utilities/comparison_helpers.o \
-src/utilities/destroy_helpers.o \
-src/utilities/swap.o
+utilities/exit_codes/exit_codes.o \
+lists/linked_lists/singly_linked_list/singly_linked_list.o\
+lists/linked_lists/doubly_linked_list/doubly_linked_list.o \
+lists/linked_lists/circular_singly_linked_list/circular_singly_linked_list.o \
+lists/array_list/array_list.o \
+utilities/void_pointer_functions/void_pointer_functions.o \
+utilities/comparison_helpers/comparison_helpers.o \
+utilities/destroy_helpers/destroy_helpers.o \
+utilities/swap/swap.o
 
 # individual test files
 SINGLY_LINKED_LIST_TESTS = test/linked_lists/singly_linked_list_tests.o
 DOUBLY_LINKED_LIST_TESTS = test/linked_lists/doubly_linked_list_tests.o
 CIRCULAR_SINGLY_LINKED_LIST_TESTS = test/linked_lists/circular_singly_linked_list_tests.o
-ARRAY_LIST_TESTS = test/array_list_tests.o
+ARRAY_LIST_TESTS = test/array_list/array_list_tests.o
 
 # combile all the tests into one list
 ALL_TESTS = test/dsa_test_all.o \

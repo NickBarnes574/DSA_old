@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "comparisons.h"
-#include "double_compare.h"
+#include "../comparisons.h"
+#include "../double_compare.h"
 
 int int_comp(const void *x, const void *y, const void *ctx);
 int str_comp(const void *x, const void *y, const void *ctx);
