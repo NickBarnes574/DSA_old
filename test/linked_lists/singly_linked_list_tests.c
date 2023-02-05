@@ -21,12 +21,12 @@ struct singly_linked_list
 
 static singly_linked_list_t *list;
 
-void setup(void)
+void sll_setup(void)
 {
     list = sll_create();
 }
 
-void teardown(void)
+void sll_teardown(void)
 {
     sll_destroy_list(&list);
 }
@@ -494,7 +494,7 @@ CU_SuiteInfo singly_linked_list_test_suite =
     "Singly Linked List Tests",
     NULL,
     NULL,
-    setup,
-    teardown,
+    sll_setup,
+    sll_teardown,
     singly_linked_list_tests
 };

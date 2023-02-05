@@ -1,6 +1,6 @@
-#include <check.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <CUnit/CUnit.h>
 
 #include "linked_lists/doubly_linked_list.h"
 #include "void_pointer_functions.h"
@@ -20,64 +20,53 @@ struct doubly_linked_list
     size_t current_size;
 };
 
+static doubly_linked_list_t *list;
+
+void dll_setup(void)
+{
+    list = dll_create();
+}
+
+void dll_teardown(void)
+{
+    dll_destroy_list(&list);
+}
+
 // CREATE LIST TESTS
 //***********************************************************************************************
 // ensure a new doubly-linked list is created
-START_TEST(test_dll_create)
+void test_dll_create(void)
 {
-    doubly_linked_list_t *list = dll_create();
-    ck_assert_ptr_ne(list, NULL);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_PTR_NOT_EQUAL(list, NULL);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_create_tests[] =
-{
-    test_dll_create,
-    NULL
-};
 
 // PUSH HEAD TESTS
 //***********************************************************************************************
 // ensure a new integer is added to the list
-START_TEST(dll_push_head_single_int)
+void dll_push_head_single_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num = 10;
 
     dll_push_head(list, &num);
-    ck_assert_int_eq(*((int *)list->head->data), 10);
-    ck_assert_int_eq(*((int *)list->tail->data), 10);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 10);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 10);
 }
-END_TEST
 
 // ensure two integers are added to the list
-START_TEST(dll_push_head_double_int)
+void dll_push_head_double_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
 
     dll_push_head(list, &num_1);
     dll_push_head(list, &num_2);
-    ck_assert_int_eq(*((int *)list->head->data), 25);
-    ck_assert_int_eq(*((int *)list->tail->data), 10);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 25);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 10);
 }
-END_TEST
 
 // ensure three integers are added to the list
-START_TEST(dll_push_head_triple_int)
+void dll_push_head_triple_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
     int num_3 = 50;
@@ -85,78 +74,48 @@ START_TEST(dll_push_head_triple_int)
     dll_push_head(list, &num_1);
     dll_push_head(list, &num_2);
     dll_push_head(list, &num_3);
-    ck_assert_int_eq(*((int *)list->head->data), 50);
-    ck_assert_int_eq(*((int *)list->tail->data), 10);
-    ck_assert_int_eq(*((int *)list->head->next->data), 25);
-    ck_assert_int_eq(*((int *)list->tail->prev->data), 25);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 50);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 10);
+    CU_ASSERT_EQUAL(*((int *)list->head->next->data), 25);
+    CU_ASSERT_EQUAL(*((int *)list->tail->prev->data), 25);
 }
-END_TEST
 
 // ensure a string is added to the list
-START_TEST(dll_push_head_single_string)
+void dll_push_head_single_string(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     const char *str = "hello";
 
     dll_push_head(list, &str);
-    ck_assert_int_eq(strcmp(*((char **)list->head->data), str), 0);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(strcmp(*((char **)list->head->data), str), 0);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_push_head_tests[] =
-{
-    dll_push_head_single_int,
-    dll_push_head_double_int,
-    dll_push_head_triple_int,
-    dll_push_head_single_string,
-    NULL
-};
 
 // PUSH TAIL TESTS
 //***********************************************************************************************
 // ensure a new integer is added to the list
-START_TEST(dll_push_tail_single_int)
+void dll_push_tail_single_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num = 10;
 
     dll_push_tail(list, &num);
-    ck_assert_int_eq(*((int *)list->head->data), 10);
-    ck_assert_int_eq(*((int *)list->tail->data), 10);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 10);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 10);
 }
-END_TEST
 
 // ensure two integers are added to the list
-START_TEST(dll_push_tail_double_int)
+void dll_push_tail_double_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
 
     dll_push_tail(list, &num_1);
     dll_push_tail(list, &num_2);
-    ck_assert_int_eq(*((int *)list->head->data), 10);
-    ck_assert_int_eq(*((int *)list->tail->data), 25);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 10);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 25);
 }
-END_TEST
 
 // ensure three integers are added to the list
-START_TEST(dll_push_tail_triple_int)
+void dll_push_tail_triple_int(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
     int num_3 = 50;
@@ -164,46 +123,26 @@ START_TEST(dll_push_tail_triple_int)
     dll_push_tail(list, &num_1);
     dll_push_tail(list, &num_2);
     dll_push_tail(list, &num_3);
-    ck_assert_int_eq(*((int *)list->head->data), 10);
-    ck_assert_int_eq(*((int *)list->tail->data), 50);
-    ck_assert_int_eq(*((int *)list->head->next->data), 25);
-    ck_assert_int_eq(*((int *)list->tail->prev->data), 25);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 10);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 50);
+    CU_ASSERT_EQUAL(*((int *)list->head->next->data), 25);
+    CU_ASSERT_EQUAL(*((int *)list->tail->prev->data), 25);
 }
-END_TEST
 
 // ensure a string is added to the list
-START_TEST(dll_push_tail_single_string)
+void dll_push_tail_single_string(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     const char *str = "hello";
 
     dll_push_tail(list, &str);
-    ck_assert_int_eq(strcmp(*((char **)list->head->data), str), 0);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(strcmp(*((char **)list->head->data), str), 0);  
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_push_tail_tests[] =
-{
-    dll_push_tail_single_int,
-    dll_push_tail_double_int,
-    dll_push_tail_triple_int,
-    dll_push_tail_single_string,
-    NULL
-};
 
 // PUSH POSITION TESTS
 //***********************************************************************************************
 // ensure dll_node is added at position 3
-START_TEST(test_dll_push_position_single_70)
+void test_dll_push_position_single_70(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -223,17 +162,12 @@ START_TEST(test_dll_push_position_single_70)
     dll_push_position(list, &num_7, 3);
 
     void *data = dll_peek_position(list, 3);
-    ck_assert_int_eq(*((int *)data), 70);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 70);
 }
-END_TEST
 
 // ensure dll_node is added at position 6
-START_TEST(test_dll_push_position_single_20)
+void test_dll_push_position_single_20(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -253,27 +187,14 @@ START_TEST(test_dll_push_position_single_20)
     dll_push_position(list, &num_7, 6);
 
     void *data = dll_peek_position(list, 6);
-    ck_assert_int_eq(*((int *)data), 20);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 20);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_push_position_tests[] =
-{
-    test_dll_push_position_single_70,
-    test_dll_push_position_single_20,
-    NULL
-};
 
 // PEEK HEAD TESTS
 //***********************************************************************************************
 // ensure the returned value is 90
-START_TEST(test_dll_peek_head)
+void test_dll_peek_head(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -290,26 +211,14 @@ START_TEST(test_dll_peek_head)
 
     void *data = dll_peek_head(list);
 
-    ck_assert_int_eq(*((int *)data), 90);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 90);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_peek_head_tests[] =
-{
-    test_dll_peek_head,
-    NULL
-};
 
 // PEEK TAIL TESTS
 //***********************************************************************************************
 // ensure the returned value is 90
-START_TEST(test_dll_peek_tail)
+void test_dll_peek_tail(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -326,26 +235,14 @@ START_TEST(test_dll_peek_tail)
 
     void *data = dll_peek_tail(list);
 
-    ck_assert_int_eq(*((int *)data), 15);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 15);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_peek_tail_tests[] =
-{
-    test_dll_peek_tail,
-    NULL
-};
 
 // PEEK POSITION TESTS
 //***********************************************************************************************
 // ensure the returned value is 90
-START_TEST(test_dll_peek_position)
+void test_dll_peek_position(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -367,31 +264,19 @@ START_TEST(test_dll_peek_position)
     void *data_5 = dll_peek_position(list, 5);
     void *data_6 = dll_peek_position(list, 6);
 
-    ck_assert_int_eq(*((int *)data_1), 90);
-    ck_assert_int_eq(*((int *)data_2), 75);
-    ck_assert_int_eq(*((int *)data_3), 60);
-    ck_assert_int_eq(*((int *)data_4), 45);
-    ck_assert_int_eq(*((int *)data_5), 30);
-    ck_assert_int_eq(*((int *)data_6), 15);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data_1), 90);
+    CU_ASSERT_EQUAL(*((int *)data_2), 75);
+    CU_ASSERT_EQUAL(*((int *)data_3), 60);
+    CU_ASSERT_EQUAL(*((int *)data_4), 45);
+    CU_ASSERT_EQUAL(*((int *)data_5), 30);
+    CU_ASSERT_EQUAL(*((int *)data_6), 15);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_peek_position_tests[] =
-{
-    test_dll_peek_position,
-    NULL
-};
 
 // POP HEAD TESTS
 //***********************************************************************************************
 // ensure ensure 90 is popped from the list
-START_TEST(test_dll_pop_head)
+void test_dll_pop_head(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -408,27 +293,15 @@ START_TEST(test_dll_pop_head)
 
     void *data = dll_pop_head(list);
 
-    ck_assert_int_eq(*((int *)data), 90);
-    ck_assert_int_eq(list->current_size, 5);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 90);
+    CU_ASSERT_EQUAL(list->current_size, 5);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_pop_head_tests[] =
-{
-    test_dll_pop_head,
-    NULL
-};
 
 // POP TAIL TESTS
 //***********************************************************************************************
 // ensure 15 is popped from the list
-START_TEST(test_dll_pop_tail)
+void test_dll_pop_tail(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -445,27 +318,15 @@ START_TEST(test_dll_pop_tail)
 
     void *data = dll_pop_tail(list);
 
-    ck_assert_int_eq(*((int *)data), 15);
-    ck_assert_int_eq(list->current_size, 5);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 15);
+    CU_ASSERT_EQUAL(list->current_size, 5);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_pop_tail_tests[] =
-{
-    test_dll_pop_tail,
-    NULL
-};
 
 // POP POSITION TESTS
 //***********************************************************************************************
 // ensure 60 is popped from the list
-START_TEST(test_dll_pop_position)
+void test_dll_pop_position(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -482,27 +343,15 @@ START_TEST(test_dll_pop_position)
 
     void *data = dll_pop_position(list, 3);
 
-    ck_assert_int_eq(*((int *)data), 60);
-    ck_assert_int_eq(list->current_size, 5);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 60);
+    CU_ASSERT_EQUAL(list->current_size, 5);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_pop_position_tests[] =
-{
-    test_dll_pop_position,
-    NULL
-};
 
 // REMOVE HEAD TESTS
 //***********************************************************************************************
 // ensure the first dll_node in the list is removed
-START_TEST(test_dll_remove_head)
+void test_dll_remove_head(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
     int num_3 = 50;
@@ -512,28 +361,16 @@ START_TEST(test_dll_remove_head)
     dll_push_head(list, &num_3);
 
     dll_remove_head(list);
-    ck_assert_int_eq(*((int *)list->head->data), 25);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 25);
     dll_remove_head(list);
-    ck_assert_int_eq(*((int *)list->head->data), 10);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->head->data), 10);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_remove_head_tests[] =
-{
-    test_dll_remove_head,
-    NULL
-};
 
 // REMOVE TAIL TESTS
 //***********************************************************************************************
 // ensure the first dll_node in the list is removed
-START_TEST(test_dll_remove_tail)
+void test_dll_remove_tail(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
     int num_3 = 50;
@@ -543,28 +380,16 @@ START_TEST(test_dll_remove_tail)
     dll_push_head(list, &num_3);
 
     dll_remove_tail(list);
-    ck_assert_int_eq(*((int *)list->tail->data), 25);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 25);
     dll_remove_tail(list);
-    ck_assert_int_eq(*((int *)list->tail->data), 50);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)list->tail->data), 50);
 }
-END_TEST
-
-// TEST LIST
-static TFun dll_remove_tail_tests[] =
-{
-    test_dll_remove_tail,
-    NULL
-};
 
 // REMOVE POSITION TESTS
 //***********************************************************************************************
-// ensure LLLL
-START_TEST(test_dll_remove_position_middle)
+// ensure the middle sll_node in the list is removed
+void test_dll_remove_position_middle(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 10;
     int num_2 = 25;
     int num_3 = 50;
@@ -575,15 +400,12 @@ START_TEST(test_dll_remove_position_middle)
 
     dll_remove_position(list, 2);
 
-    ck_assert_int_eq(list->current_size, 2);
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(list->current_size, 2);
 }
-END_TEST
 
-START_TEST(test_dll_remove_position_front)
+// ensure the front dll_node in the list is removed
+void test_dll_remove_position_front(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -602,16 +424,12 @@ START_TEST(test_dll_remove_position_front)
 
     void *data = dll_peek_head(list);
 
-    ck_assert_int_eq(*((int *)data), 75);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 75);
 }
-END_TEST
 
-START_TEST(test_dll_remove_position_back)
+// ensure the back dll_node in the list is removed
+void test_dll_remove_position_back(void)
 {
-    doubly_linked_list_t *list = dll_create();
-
     int num_1 = 15;
     int num_2 = 30;
     int num_3 = 45;
@@ -630,112 +448,54 @@ START_TEST(test_dll_remove_position_back)
 
     void *data = dll_peek_tail(list);
 
-    ck_assert_int_eq(*((int *)data), 30);
-
-    dll_destroy_list(&list);
+    CU_ASSERT_EQUAL(*((int *)data), 30);
 }
-END_TEST
 
-// TEST LIST
-static TFun dll_remove_position_tests[] =
+static CU_TestInfo doubly_linked_list_tests[] =
 {
-    test_dll_remove_position_middle,
-    test_dll_remove_position_front,
-    test_dll_remove_position_back,
-    NULL
+    // Create List
+    {"Create List", test_dll_create},
+
+    // Push
+    {"Push Head - 10", dll_push_head_single_int},
+    {"Push Head - 10, 25", dll_push_head_double_int},
+    {"Push Head - 10, 25, 50", dll_push_head_triple_int},
+    {"Push Head - \"Hello\"", dll_push_head_single_string},
+
+    {"Push Tail - 10", dll_push_tail_single_int},
+    {"Push Tail - 10, 25", dll_push_tail_double_int},
+    {"Push Tail - 10, 25, 50", dll_push_tail_triple_int},
+    {"Push Tail - \"Hello\"", dll_push_tail_single_string},
+
+    {"Push Position - 70", test_dll_push_position_single_70},
+    {"Push Position - 20", test_dll_push_position_single_20},
+
+    // Peek
+    {"Peek Head", test_dll_peek_head},
+    {"Peek Tail", test_dll_peek_tail},
+    {"Peek Position", test_dll_peek_position},
+
+    // Pop
+    {"Pop Head", test_dll_pop_head},
+    {"Pop Tail", test_dll_pop_tail},
+    {"Pop Position", test_dll_pop_position},
+
+    // Remove
+    {"Remove Head", test_dll_remove_head},
+    {"Remove Tail", test_dll_remove_tail},
+
+    {"Remove Position - Front", test_dll_remove_position_front},
+    {"Remove Position - Back", test_dll_remove_position_back},
+    {"Remove Position - Middle", test_dll_remove_position_middle},
+    CU_TEST_INFO_NULL
 };
 
-static void add_tests(TCase * test_cases, TFun * test_functions)
+CU_SuiteInfo doubly_linked_list_test_suite =
 {
-    while (* test_functions)
-    {
-        // add the test from the core_tests array to the tcase
-        tcase_add_test(test_cases, * test_functions);
-        test_functions++;
-    }
-}
-
-Suite *doubly_linked_list_test_suite(void)
-{
-    Suite *doubly_linked_list_test_suite = suite_create("Doubly Linked List Tests");
-
-    //Create dll_create tests
-    TFun *dll_create_test_list = dll_create_tests;
-    TCase *dll_create_test_cases = tcase_create(" dll_create() Tests");
-    add_tests(dll_create_test_cases, dll_create_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_create_test_cases);
-
-    //Create dll_push_head tests
-    TFun *dll_push_head_test_list = dll_push_head_tests;
-    TCase *dll_push_head_test_cases = tcase_create(" dll_push_head() Tests");
-    add_tests(dll_push_head_test_cases, dll_push_head_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_push_head_test_cases);
-
-    //Create dll_push_tail tests
-    TFun *dll_push_tail_test_list = dll_push_tail_tests;
-    TCase *dll_push_tail_test_cases = tcase_create(" dll_push_tail() Tests");
-    add_tests(dll_push_tail_test_cases, dll_push_tail_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_push_tail_test_cases);
-
-    //Create dll_push_position tests
-    TFun *dll_push_position_test_list = dll_push_position_tests;
-    TCase *dll_push_position_test_cases = tcase_create(" dll_push_position() Tests");
-    add_tests(dll_push_position_test_cases, dll_push_position_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_push_position_test_cases);
-
-    //Create dll_peek_head tests
-    TFun *dll_peek_head_test_list = dll_peek_head_tests;
-    TCase *dll_peek_head_test_cases = tcase_create(" dll_peek_head() Tests");
-    add_tests(dll_peek_head_test_cases, dll_peek_head_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_peek_head_test_cases);
-
-    //Create dll_peek_tail tests
-    TFun *dll_peek_tail_test_list = dll_peek_tail_tests;
-    TCase *dll_peek_tail_test_cases = tcase_create(" dll_peek_tail() Tests");
-    add_tests(dll_peek_tail_test_cases, dll_peek_tail_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_peek_tail_test_cases);
-
-    //Create dll_peek_position tests
-    TFun *dll_peek_position_test_list = dll_peek_position_tests;
-    TCase *dll_peek_position_test_cases = tcase_create(" dll_peek_position() Tests");
-    add_tests(dll_peek_position_test_cases, dll_peek_position_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_peek_position_test_cases);
-
-    //Create dll_pop_head tests
-    TFun *dll_pop_head_test_list = dll_pop_head_tests;
-    TCase *dll_pop_head_test_cases = tcase_create(" dll_pop_head() Tests");
-    add_tests(dll_pop_head_test_cases, dll_pop_head_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_pop_head_test_cases);
-
-    //Create dll_pop_tail tests
-    TFun *dll_pop_tail_test_list = dll_pop_tail_tests;
-    TCase *dll_pop_tail_test_cases = tcase_create(" dll_pop_tail() Tests");
-    add_tests(dll_pop_tail_test_cases, dll_pop_tail_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_pop_tail_test_cases);
-
-    //Create dll_pop_position tests
-    TFun *dll_pop_position_test_list = dll_pop_position_tests;
-    TCase *dll_pop_position_test_cases = tcase_create(" dll_pop_position() Tests");
-    add_tests(dll_pop_position_test_cases, dll_pop_position_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_pop_position_test_cases);
-
-    //Create dll_remove_head tests
-    TFun *dll_remove_head_test_list = dll_remove_head_tests;
-    TCase *dll_remove_head_test_cases = tcase_create(" dll_remove_head() Tests");
-    add_tests(dll_remove_head_test_cases, dll_remove_head_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_remove_head_test_cases);
-
-    //Create dll_remove_tail tests
-    TFun *dll_remove_tail_test_list = dll_remove_tail_tests;
-    TCase *dll_remove_tail_test_cases = tcase_create(" dll_remove_tail() Tests");
-    add_tests(dll_remove_tail_test_cases, dll_remove_tail_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_remove_tail_test_cases);
-
-    //Create dll_remove_position tests
-    TFun *dll_remove_position_test_list = dll_remove_position_tests;
-    TCase *dll_remove_position_test_cases = tcase_create(" dll_remove_position() Tests");
-    add_tests(dll_remove_position_test_cases, dll_remove_position_test_list);
-    suite_add_tcase(doubly_linked_list_test_suite, dll_remove_position_test_cases);
-
-    return doubly_linked_list_test_suite;
-}
+    "Doubly Linked List Tests",
+    NULL,
+    NULL,
+    dll_setup,
+    dll_teardown,
+    doubly_linked_list_tests
+};

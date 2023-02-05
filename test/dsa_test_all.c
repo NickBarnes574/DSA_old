@@ -6,10 +6,12 @@ int main(void)
     CU_basic_set_mode(CU_BRM_VERBOSE);
 
     extern CU_SuiteInfo singly_linked_list_test_suite;
+    extern CU_SuiteInfo doubly_linked_list_test_suite;
 
     CU_SuiteInfo suites[] = 
     {
         singly_linked_list_test_suite,
+        doubly_linked_list_test_suite,
         CU_SUITE_INFO_NULL
     };
 
