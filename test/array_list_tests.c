@@ -47,7 +47,6 @@ void test_array_list_insert_NULL_list(void)
 
 void test_array_list_insert_NULL_data(void)
 {
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, NULL);
     CU_ASSERT_EQUAL(exit_code, E_NULL_POINTER);
 }
@@ -56,7 +55,6 @@ void test_array_list_insert_int_single(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
     CU_ASSERT_EQUAL(*((int *)list->elements[0]), 10); 
@@ -65,8 +63,6 @@ void test_array_list_insert_int_single(void)
 void test_array_list_insert_int_multi(void)
 {
     int num_array[] = {13, 52, 36, 41, 76, 85};
-
-    array_list_t *list = array_list_create(NULL, NULL);
 
     //************************************
     // Insert elements
@@ -125,7 +121,6 @@ void test_array_list_insert_string_single(void)
 {
     const char *str = "hello";
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &str);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
     CU_ASSERT_EQUAL(strcmp(*((char **)list->elements[0]), str), 0);
@@ -134,8 +129,6 @@ void test_array_list_insert_string_single(void)
 void test_array_list_insert_string_multi(void)
 {
     const char *words[] = {"hello", "world", "I", "am", "big", "chungus"};
-
-    array_list_t *list = array_list_create(NULL, NULL);
 
     //************************************
     // Insert elements
@@ -196,7 +189,6 @@ void test_array_list_get_NULL_list(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -208,7 +200,6 @@ void test_array_list_get_int(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -220,7 +211,6 @@ void test_array_list_get_string(void)
 {
     const char *str = "hello";
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &str);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -234,7 +224,6 @@ void test_array_list_set_NULL_list(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -249,7 +238,6 @@ void test_array_list_set_NULL_data(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -262,7 +250,6 @@ void test_array_list_set_int(void)
 {
     int num_1 = 10;
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &num_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
@@ -282,7 +269,6 @@ void test_array_list_set_string(void)
 {
     const char *str_1 = "hello";
 
-    array_list_t *list = array_list_create(NULL, NULL);
     exit_code = array_list_insert(list, 0, &str_1);
     CU_ASSERT_EQUAL(exit_code, E_SUCCESS);
 
