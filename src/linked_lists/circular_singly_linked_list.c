@@ -68,11 +68,13 @@ exit_code_t csll_push_head(circular_singly_linked_list_t *list, void *data)
         // a. Insert node as the first node in the list if list is empty
         list->head = new_node;
         list->tail = new_node;
+        list->tail->next = list->head;
     }    
     else
     {
         // b. Insert node at the front of the list
-        new_node->next = list->head;
+        new_node->next = list->tail->next;
+        list->tail->next = new_node;
         list->head = new_node;
     }
 
@@ -110,6 +112,7 @@ exit_code_t csll_push_tail(circular_singly_linked_list_t *list, void *data)
         // a. Insert node as the first node in the list if list is empty
         list->head = new_node;
         list->tail = new_node;
+        list->tail->next = list->head;
     }    
     else
     {
@@ -487,7 +490,8 @@ exit_code_t csll_print_list(circular_singly_linked_list_t *list, void (*function
     
 
     // 4. Print the list
-    while (NULL != current_node)
+    //while (NULL != current_node)
+    for (int idx = 0; idx < list->current_size * 2; idx++)
     {
         (*function_ptr)(current_node->data);
 

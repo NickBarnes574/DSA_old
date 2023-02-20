@@ -267,6 +267,10 @@ void test_csll_peek_position(void)
     CU_ASSERT_EQUAL(*((int *)data_4), 45);
     CU_ASSERT_EQUAL(*((int *)data_5), 30);
     CU_ASSERT_EQUAL(*((int *)data_6), 15);
+
+    printf("\n");
+    csll_print_list(list, print_int);
+    printf("\n");
 }
 
 // POP HEAD TESTS
