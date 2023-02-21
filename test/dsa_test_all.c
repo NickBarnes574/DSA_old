@@ -8,6 +8,7 @@ int main(void)
     extern CU_SuiteInfo singly_linked_list_test_suite;
     extern CU_SuiteInfo doubly_linked_list_test_suite;
     extern CU_SuiteInfo circular_singly_linked_list_test_suite;
+    extern CU_SuiteInfo circular_doubly_linked_list_test_suite;
     extern CU_SuiteInfo array_list_test_suite;
 
     CU_SuiteInfo suites[] = 
@@ -15,6 +16,7 @@ int main(void)
         singly_linked_list_test_suite,
         doubly_linked_list_test_suite,
         circular_singly_linked_list_test_suite,
+        circular_doubly_linked_list_test_suite,
         array_list_test_suite,
         CU_SUITE_INFO_NULL
     };
